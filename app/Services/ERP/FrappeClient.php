@@ -1,0 +1,97 @@
+<?php
+
+namespace App\Services\ERP;
+
+use App\Models\ErpSetting;
+use Illuminate\Support\Facades\Http;
+use Exception;
+
+class FrappeClient
+{
+    protected ?ErpSetting $setting;
+
+    public function __construct()
+    {
+        // For simplicity, we assume there is only one setting record
+        $this->setting = ErpSetting::first();
+    }
+
+    public function isConfigured(): bool
+    {
+        return $this->setting && $this->setting->erp_site_url && $this->setting->api_key && $this->setting->api_secret;
+    }
+
+    public function getSetting(): ?ErpSetting
+    {
+        return $this->setting;
+    }
+
+    protected function buildUrl(string $endpoint): string
+    {
+        $baseUrl = rtrim($this->setting->erp_site_url, '/');
+        $endpoint = ltrim($endpoint, '/');
+        return "{$baseUrl}/api/resource/{$endpoint}";
+    }
+    
+    public function getMethodUrl(string $method): string
+    {
+        $baseUrl = rtrim($this->setting->erp_site_url, '/');
+        $method = ltrim($method, '/');
+        return "{$baseUrl}/api/method/{$method}";
+    }
+
+    protected function getHeaders(): array
+    {
+        return [
+            'Authorization' => 'token ' . $this->setting->api_key . ':' . $this->setting->api_secret,
+            'Accept' => 'application/json',
+            'Content-Type' => 'application/json',
+        ];
+    }
+
+    public function get(string $endpoint, array $query = [])
+    {
+        if (!$this->isConfigured()) {
+            throw new Exception("ERP settings are not fully configured.");
+        }
+
+        $response = Http::withHeaders($this->getHeaders())
+            ->get($this->buildUrl($endpoint), $query);
+
+        return $this->handleResponse($response);
+    }
+
+    public function post(string $endpoint, array $data = [])
+    {
+        if (!$this->isConfigured()) {
+            throw new Exception("ERP settings are not fully configured.");
+        }
+
+        $response = Http::withHeaders($this->getHeaders())
+            ->post($this->buildUrl($endpoint), $data);
+
+        return $this->handleResponse($response);
+    }
+
+    public function put(string $endpoint, array $data = [])
+    {
+        if (!$this->isConfigured()) {
+            throw new Exception("ERP settings are not fully configured.");
+        }
+
+        $response = Http::withHeaders($this->getHeaders())
+            ->put($this->buildUrl($endpoint), $data);
+
+        return $this->handleResponse($response);
+    }
+
+    protected function handleResponse($response)
+    {
+        if ($response->successful()) {
+            return $response->json('data') ?? $response->json('message');
+        }
+
+        $errorMsg = $response->json('exc') ?? $response->body();
+        throw new Exception("Frappe API Error ({$response->status()}): " . $errorMsg);
+    }
+}
