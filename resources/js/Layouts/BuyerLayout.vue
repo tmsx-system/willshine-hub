@@ -4,7 +4,10 @@ import { Link, usePage, router } from '@inertiajs/vue3';
 
 const page = usePage();
 
-const cartCount = ref(2); // Will come from shared Inertia data in production
+const cartCount = ref(0);
+const user = computed(() => page.props.auth?.user ?? {});
+const userLabel = computed(() => user.value.customer_name || user.value.name || 'Pelanggan');
+const initials = computed(() => userLabel.value.slice(0, 2).toUpperCase());
 
 const navItems = [
     {
@@ -70,14 +73,9 @@ function logout() {
 
             <!-- Logo area -->
             <div class="flex items-center gap-3 px-5 py-5 border-b border-gray-100">
-                <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-pink-400 to-pink-700 flex items-center justify-center shadow-sm" style="box-shadow: 0 4px 12px rgba(190,24,93,0.3);">
-                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
-                    </svg>
-                </div>
                 <div>
                     <p class="text-[10px] font-bold text-pink-400 uppercase tracking-widest">PT TMSX</p>
-                    <h1 class="text-sm font-bold text-gray-900 leading-tight">Willshine Hub</h1>
+                    <h1 class="text-base font-black text-gray-900 leading-tight">Willshine Hub</h1>
                 </div>
             </div>
 
@@ -106,11 +104,11 @@ function logout() {
             <div class="px-3 py-4 border-t border-gray-100">
                 <div class="flex items-center gap-3 px-3 py-3 rounded-2xl hover:bg-pink-50 transition-colors cursor-pointer group">
                     <div class="w-9 h-9 rounded-full bg-gradient-to-br from-pink-400 to-pink-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-                        PB
+                        {{ initials }}
                     </div>
                     <div class="flex-1 min-w-0">
-                        <p class="text-sm font-semibold text-gray-800 truncate">PT Berkah Mandiri</p>
-                        <p class="text-xs text-gray-400 truncate">hendra@berkah.co.id</p>
+                        <p class="text-sm font-semibold text-gray-800 truncate">{{ userLabel }}</p>
+                        <p class="text-xs text-gray-400 truncate">{{ user.email }}</p>
                     </div>
                     <button
                         @click="logout"
@@ -130,11 +128,6 @@ function logout() {
             <div class="flex items-center justify-between px-4 h-14">
                 <!-- Brand -->
                 <div class="flex items-center gap-2.5">
-                    <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-pink-400 to-pink-700 flex items-center justify-center">
-                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
-                        </svg>
-                    </div>
                     <span class="text-sm font-bold text-gray-900">Willshine Hub</span>
                 </div>
 

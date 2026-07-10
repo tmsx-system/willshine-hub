@@ -3,6 +3,7 @@
 namespace App\Services\ERP;
 
 use App\Models\ErpItem;
+use App\Models\ProductCatalog;
 use Exception;
 use Illuminate\Support\Facades\Log;
 
@@ -24,7 +25,7 @@ class ItemService
 
             while ($hasMore) {
                 $query = [
-                    'fields' => '["name", "item_code", "item_name", "item_group", "stock_uom", "description", "brand", "image", "website_image", "is_stock_item", "disabled", "has_batch_no", "has_serial_no", "modified"]',
+                    'fields' => '["name", "item_code", "item_name", "item_group", "stock_uom", "description", "brand", "image", "is_stock_item", "disabled", "has_batch_no", "has_serial_no", "modified"]',
                     'limit_page_length' => $limit,
                     'limit_start' => $start,
                 ];
@@ -49,7 +50,7 @@ class ItemService
                         $imageUrl = str_starts_with($data['image'], 'http') ? $data['image'] : $baseUrl . $data['image'];
                     }
 
-                    ErpItem::updateOrCreate(
+                    $item = ErpItem::updateOrCreate(
                         ['erp_item_id' => $data['name']],
                         [
                             'item_code' => $data['item_code'] ?? $data['name'],
@@ -67,6 +68,23 @@ class ItemService
                             'erp_modified_at' => isset($data['modified']) ? \Carbon\Carbon::parse($data['modified']) : null,
                             'last_synced_at' => now(),
                         ]
+                    );
+
+                    ProductCatalog::firstOrCreate(
+                        ['item_id' => $item->id],
+                        [
+                            'item_code' => $item->item_code,
+                            'item_name' => $item->item_name,
+                            'display_name' => $item->item_name,
+                            'display_description' => $item->description,
+                            'display_image_url' => $item->website_image_url ?: $item->image_url,
+                            'is_visible' => false,
+                            'is_featured' => false,
+                            'display_order' => 0,
+                            'minimum_qty' => 1,
+                            'show_stock' => true,
+                            'show_price' => true,
+                        ],
                     );
                 }
 

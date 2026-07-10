@@ -1,294 +1,215 @@
 <script setup>
-import { ref } from 'vue';
+import { computed } from 'vue';
 import { Link } from '@inertiajs/vue3';
-import GuestLayout from '@/Layouts/GuestLayout.vue';
+import PublicLayout from '@/Layouts/PublicLayout.vue';
 
-defineOptions({ layout: GuestLayout });
+const props = defineProps({
+    products: { type: Array, default: () => [] },
+});
 
-const products = [
-    {
-        name: 'Premium Fuji Apple',
-        grade: 'Grade AAA / Import',
-        price: 'Rp 45.000/kg',
-        stockStatus: 'In Stock',
-        image: '/images/apple_fuji.png',
-        action: 'Tambah Pesanan',
-    },
-    {
-        name: 'Organic Banana',
-        grade: 'Cavendish Local Organik',
-        price: 'Rp 18.500/kg',
-        stockStatus: 'Limited',
-        image: '/images/banana_organic.png',
-        action: 'Tambah Pesanan',
-    },
-    {
-        name: 'Dragon Fruit',
-        grade: 'Super Red / Superfood',
-        price: 'Rp 25.000/kg',
-        stockStatus: 'Hot Sale',
-        image: '/images/dragon_fruit.png',
-        action: 'Tambah Pesanan',
-    },
-    {
-        name: 'Honey Mango',
-        grade: 'Probolinggo Export Quality',
-        price: 'Rp 35.000/kg',
-        stockStatus: 'Out of Stock',
-        image: '/images/honey_mango.png',
-        action: 'Notify Me',
-    },
+const sampleProducts = [
+    { id: 'sample-1', name: 'Cavendish Banana Premium', category: 'Banana', grade: 'Premium Grade - 12 kg per box', uom: 'Box', price: 'Rp75.000', stock_status: 'In Stock', image: '/images/banana_organic.png', badge: 'Best Seller' },
+    { id: 'sample-2', name: 'Papaya Red Lady', category: 'Papaya', grade: 'Fresh Selection - minimum order 1 box', uom: 'Box', price: 'Rp68.000', stock_status: 'In Stock', image: '/images/honey_mango.png', badge: 'New Arrival' },
+    { id: 'sample-3', name: 'Premium Mangosteen', category: 'Mangosteen', grade: 'Grade A - 5 kg pack', uom: 'Pack', price: 'Rp125.000', stock_status: 'Low Stock', image: '/images/dragon_fruit.png', badge: 'Popular' },
+    { id: 'sample-4', name: 'Sweet Pineapple', category: 'Pineapple', grade: 'Fresh Selection - crate packaging', uom: 'Crate', price: 'Rp95.000', stock_status: 'In Stock', image: '/images/apple_fuji.png', badge: 'Special Offer' },
 ];
+
+const products = computed(() => {
+    if (!props.products.length) return sampleProducts;
+
+    return props.products.slice(0, 4).map((product, index) => ({
+        ...sampleProducts[index],
+        ...product,
+        price: product.price || sampleProducts[index]?.price,
+        image: product.image || sampleProducts[index]?.image,
+        badge: sampleProducts[index]?.badge || 'Featured',
+        stock_status: product.stock_status || 'In Stock',
+    }));
+});
+
+const categories = [
+    { name: 'Banana', count: '12 products', image: '/images/banana_organic.png' },
+    { name: 'Papaya', count: '8 products', image: '/images/honey_mango.png' },
+    { name: 'Pineapple', count: '6 products', image: '/images/apple_fuji.png' },
+    { name: 'Mangosteen', count: '5 products', image: '/images/dragon_fruit.png' },
+    { name: 'Watermelon', count: '7 products', image: '/images/hero_fruits.png' },
+    { name: 'Special Offers', count: 'Weekly deals', image: '/images/banana_organic.png' },
+];
+
+const benefits = [
+    ['Fresh Product Selection', 'Produk dipilih berdasarkan standar kualitas dan kesegaran.'],
+    ['Clear Product Information', 'Informasi grade, kemasan, satuan, dan harga ditampilkan dengan jelas.'],
+    ['Easy Ordering', 'Proses pemesanan sederhana dari berbagai perangkat.'],
+    ['Reliable Service', 'Dukungan untuk kebutuhan pelanggan pribadi maupun bisnis.'],
+];
+
+const steps = ['Explore Products', 'Add Products to Cart', 'Complete Your Order', 'Track Your Delivery'];
 </script>
 
 <template>
-    <div class="min-h-screen bg-[#fcf6f9] font-sans">
-        <!-- ── Navbar ─────────────────────────────────── -->
-        <nav class="max-w-[1400px] mx-auto px-6 py-5 flex items-center justify-between">
-            <div class="flex items-center gap-2">
-                <span class="text-2xl font-bold text-[#b91c63]">Willshine</span>
-                <span class="text-2xl font-bold text-gray-700">Hub</span>
-            </div>
-
-            <div class="hidden md:flex items-center gap-8 text-sm font-semibold">
-                <Link href="/" class="text-[#b91c63] border-b-2 border-[#b91c63] pb-1">Home</Link>
-                <Link href="/products" class="text-gray-500 hover:text-[#b91c63]">Products</Link>
-                <Link href="/public-rewards" class="text-gray-500 hover:text-[#b91c63]">Rewards</Link>
-            </div>
-
-            <div class="flex items-center gap-4">
-                <Link href="/login" class="text-[#b91c63] font-semibold text-sm hover:underline">Login</Link>
-                <Link href="/login" class="bg-[#b91c63] text-white px-5 py-2.5 rounded-full text-sm font-semibold shadow-md hover:bg-[#9a1752] transition-colors">
-                    Get Started
-                </Link>
-            </div>
-        </nav>
-
-        <!-- ── Hero Section ────────────────────────────── -->
-        <section class="max-w-[1400px] mx-auto px-6 py-12 flex flex-col-reverse lg:flex-row items-center gap-12 lg:gap-24">
-            <!-- Left: Text content -->
-            <div class="flex-1">
-                <div class="inline-flex items-center gap-2 bg-[#fce7f0] text-[#b91c63] px-3 py-1.5 rounded-full text-xs font-bold mb-6">
-                    <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                    B2B Fresh Produce Exclusive
-                </div>
-
-                <h1 class="text-5xl lg:text-7xl font-extrabold text-gray-900 leading-tight tracking-tight mb-6">
-                    Order <span class="text-[#b91c63]">Fresh<br>Products</span> Easily
+    <PublicLayout active="home">
+        <section class="public-container grid items-center gap-12 py-12 lg:grid-cols-[1fr_.92fr] lg:py-16">
+            <div>
+                <p class="text-sm font-bold uppercase tracking-[.2em] text-[#BE185D]">Premium fresh produce</p>
+                <h1 class="mt-4 max-w-4xl text-4xl font-black leading-[1.05] tracking-tight text-[#111827] sm:text-5xl lg:text-6xl">
+                    Fresh Products, Selected with Care
                 </h1>
-
-                <p class="text-gray-600 text-base max-w-lg mb-10 leading-relaxed">
-                    Portal pelanggan untuk melihat stok, membuat pesanan, dan memantau order secara real-time. Solusi terintegrasi untuk rantai pasok buah berkualitas tinggi.
+                <p class="mt-5 max-w-2xl text-base leading-7 text-[#374151] md:text-lg">
+                    Temukan pilihan buah segar dan produk berkualitas untuk kebutuhan rumah, usaha, dan pembelian rutin Anda.
                 </p>
-
-                <div class="flex flex-wrap items-center gap-4">
-                    <Link href="/login" class="bg-[#b91c63] text-white px-8 py-4 rounded-2xl font-bold flex items-center gap-2 hover:bg-[#9a1752] transition-shadow shadow-xl shadow-pink-900/20">
-                        Login Buyer
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+                <div class="mt-8 flex flex-col gap-3 sm:flex-row">
+                    <Link href="/products" class="inline-flex min-h-12 items-center justify-center rounded-xl bg-[#EC4899] px-6 py-3 text-sm font-bold text-white shadow-lg shadow-pink-900/15 transition hover:-translate-y-0.5 hover:bg-[#BE185D]">
+                        Shop Products
                     </Link>
-                    <Link href="/products" class="bg-[#f0e4ea] text-gray-800 px-8 py-4 rounded-2xl font-bold hover:bg-[#e6d8df] transition-colors">
-                        Lihat Produk
-                    </Link>
-                </div>
-            </div>
-
-            <!-- Right: Hero Image -->
-            <div class="flex-1 relative w-full max-w-2xl">
-                <!-- Decorative background elements -->
-                <div class="absolute -top-10 -right-10 w-full h-full bg-[#fce7f0] rounded-[3rem] -z-10"></div>
-                
-                <div class="relative rounded-[3rem] overflow-hidden border-8 border-white shadow-2xl">
-                    <img :src="'/images/hero_fruits.png'" alt="Fresh fruits bowl" class="w-full h-auto object-cover aspect-[4/3]" />
-                </div>
-
-                <!-- Floating Badge -->
-                <div class="absolute -bottom-6 left-10 bg-white p-4 rounded-2xl shadow-xl flex items-center gap-4">
-                    <div class="w-12 h-12 bg-[#b91c63] rounded-full flex items-center justify-center text-white">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
-                    </div>
-                    <div>
-                        <p class="text-xs text-gray-500 font-medium">Real-time Stock</p>
-                        <p class="text-[#b91c63] font-bold text-lg">99.9% Reliable</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ── Features Section ────────────────────────── -->
-        <section class="max-w-[1400px] mx-auto px-6 py-20">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl font-extrabold text-gray-900 mb-3">Efficient Supply Management</h2>
-                <p class="text-gray-500 max-w-2xl mx-auto">
-                    Nikmati kemudahan mengelola operasional harian Anda dengan fitur-fitur yang dirancang khusus untuk efisiensi bisnis buah.
-                </p>
-            </div>
-
-            <!-- Bento Grid Layout -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-                <!-- Stock Allocation (Span 2) -->
-                <div class="md:col-span-2 bg-[#f4f7fc] border border-blue-100 rounded-[2rem] p-8 flex flex-col md:flex-row gap-8 items-center">
-                    <div class="flex-1">
-                        <div class="w-12 h-12 bg-[#b91c63] text-white rounded-full flex items-center justify-center mb-6 shadow-md shadow-pink-900/20">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
-                        </div>
-                        <h3 class="text-xl font-bold text-gray-900 mb-3">Stock Allocation</h3>
-                        <p class="text-gray-500 text-sm leading-relaxed">
-                            Alokasi stok otomatis berdasarkan preferensi pelanggan dan histori pesanan. Pastikan ketersediaan produk unggulan Anda selalu terjaga.
-                        </p>
-                    </div>
-                    <div class="flex-1 w-full bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
-                        <div class="flex justify-between mb-2">
-                            <div class="w-16 h-3 bg-pink-100 rounded-full"></div>
-                            <div class="w-8 h-3 bg-blue-100 rounded-full"></div>
-                        </div>
-                        <div class="space-y-4 mt-6">
-                            <div class="relative h-2 bg-gray-100 rounded-full">
-                                <div class="absolute inset-y-0 left-0 w-[85%] bg-[#b91c63] rounded-full"></div>
-                                <span class="absolute -right-2 -top-5 text-[10px] font-bold text-[#b91c63]">85% Allocated</span>
-                            </div>
-                            <div class="relative h-2 bg-gray-100 rounded-full">
-                                <div class="absolute inset-y-0 left-0 w-[60%] bg-gray-600 rounded-full"></div>
-                                <span class="absolute -right-2 -top-5 text-[10px] font-bold text-gray-600">60% Allocated</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Easy Ordering -->
-                <div class="bg-white border border-pink-100 rounded-[2rem] p-8 shadow-sm">
-                    <div class="w-12 h-12 bg-[#b91c63] text-white rounded-full flex items-center justify-center mb-6 shadow-md shadow-pink-900/20">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-                    </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-3">Easy Ordering</h3>
-                    <p class="text-gray-500 text-sm leading-relaxed mb-6">
-                        Proses checkout satu klik yang cepat dan efisien.
-                    </p>
-                    <div class="flex gap-2">
-                        <div class="h-1.5 w-1/2 bg-[#b91c63] rounded-full"></div>
-                        <div class="h-1.5 w-1/2 bg-pink-200 rounded-full"></div>
-                    </div>
-                </div>
-
-                <!-- Order Approval -->
-                <div class="bg-[#e8ebf0] border border-gray-200 rounded-[2rem] p-8">
-                    <div class="w-12 h-12 bg-gray-700 text-white rounded-full flex items-center justify-center mb-6">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-3">Order Approval</h3>
-                    <p class="text-gray-600 text-sm leading-relaxed">
-                        Jalur persetujuan transparan dengan notifikasi instan.
-                    </p>
-                </div>
-
-                <!-- Reward Points (Span 2) -->
-                <div class="md:col-span-2 bg-[#fbe7f0] border border-pink-200 rounded-[2rem] p-8 flex flex-col md:flex-row gap-8 items-center justify-between">
-                    <div class="flex-1">
-                        <div class="w-12 h-12 bg-[#b91c63] text-white rounded-full flex items-center justify-center mb-6 shadow-md shadow-pink-900/20">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"></path></svg>
-                        </div>
-                        <h3 class="text-xl font-bold text-gray-900 mb-3">Reward Points</h3>
-                        <p class="text-[#883e60] text-sm leading-relaxed max-w-sm">
-                            Setiap transaksi memberikan poin loyalitas yang dapat ditukarkan dengan diskon eksklusif dan produk gratis.
-                        </p>
-                    </div>
-                    <div class="flex flex-col items-center">
-                        <div class="w-24 h-24 rounded-full border-4 border-[#b91c63] bg-white flex items-center justify-center relative shadow-lg">
-                            <span class="text-2xl font-bold text-[#b91c63]">2.5k</span>
-                            <div class="absolute -top-2 -right-2 w-6 h-6 bg-gray-700 rounded-full flex items-center justify-center text-white text-xs">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                            </div>
-                        </div>
-                        <p class="text-[#b91c63] text-xs font-bold mt-4">Loyalty Level: Platinum</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ── Product Showcase ────────────────────────── -->
-        <section class="max-w-[1400px] mx-auto px-6 py-20">
-            <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10">
-                <div>
-                    <h2 class="text-2xl font-extrabold text-gray-900">Fresh This Week</h2>
-                    <p class="text-gray-500 mt-1">Stok terbaru buah segar berkualitas tinggi yang siap untuk dipesan.</p>
-                </div>
-                <Link href="/products" class="text-[#b91c63] font-bold text-sm hover:underline flex items-center gap-1">
-                    See All Catalog
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path></svg>
-                </Link>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div v-for="(product, idx) in products" :key="idx" class="bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-shadow flex flex-col group p-2">
-                    <div class="relative h-56 bg-gray-50 rounded-2xl overflow-hidden">
-                        <img :src="product.image" :alt="product.name" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                        
-                        <!-- Status Badge -->
-                        <div class="absolute top-3 right-3 bg-white/90 backdrop-blur px-2.5 py-1 rounded-md text-[10px] font-bold border border-white/50"
-                             :class="{
-                                 'text-[#b91c63]': product.stockStatus === 'In Stock',
-                                 'text-amber-600': product.stockStatus === 'Limited',
-                                 'text-red-600': product.stockStatus === 'Hot Sale',
-                                 'text-gray-500': product.stockStatus === 'Out of Stock'
-                             }">
-                            {{ product.stockStatus }}
-                        </div>
-                    </div>
-                    
-                    <div class="p-4 flex flex-col flex-1">
-                        <h3 class="font-bold text-gray-900 text-lg leading-tight mb-1">{{ product.name }}</h3>
-                        <p class="text-xs text-gray-500 mb-3">{{ product.grade }}</p>
-                        
-                        <p class="text-[#b91c63] font-bold text-base mb-4 mt-auto">{{ product.price }}</p>
-                        
-                        <button :class="[
-                            'w-full py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-colors',
-                            product.action === 'Tambah Pesanan' 
-                                ? 'bg-[#b91c63] text-white hover:bg-[#9a1752]' 
-                                : 'bg-[#e5dce0] text-gray-600 hover:bg-[#d6cbd1]'
-                        ]">
-                            <svg v-if="product.action === 'Tambah Pesanan'" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-                            <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
-                            {{ product.action }}
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ── CTA Section ─────────────────────────────── -->
-        <section class="max-w-[1400px] mx-auto px-6 py-10">
-            <div class="bg-[#2a2d37] rounded-[2rem] p-10 md:p-16 flex flex-col md:flex-row items-center justify-between gap-10">
-                <div class="max-w-xl">
-                    <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">Ready to transform your procurement?</h2>
-                    <p class="text-gray-400 text-base leading-relaxed">
-                        Join hundreds of businesses that have simplified their fruit sourcing with Willshine Hub. Experience efficiency like never before.
-                    </p>
-                </div>
-                <div class="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
-                    <Link href="/login" class="bg-[#b91c63] text-white px-8 py-4 rounded-xl font-bold text-center hover:bg-[#9a1752] transition-colors whitespace-nowrap">
-                        Register Your Business
-                    </Link>
-                    <a href="mailto:support@tmsx.co.id" class="bg-[#3a3f4c] text-white px-8 py-4 rounded-xl font-bold text-center hover:bg-[#4a5061] transition-colors whitespace-nowrap border border-gray-600">
-                        Contact Support
+                    <a href="#categories" class="inline-flex min-h-12 items-center justify-center rounded-xl border border-[#FBCFE8] bg-white px-6 py-3 text-sm font-bold text-[#BE185D] transition hover:bg-[#FDF2F8]">
+                        Explore Categories
                     </a>
                 </div>
+                <div class="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                    <div v-for="item in ['Fresh Selection', 'Quality Checked', 'Reliable Supply', 'Easy Ordering']" :key="item" class="rounded-2xl border border-[#E5E7EB] bg-white px-4 py-3 text-sm font-bold text-[#374151] shadow-sm">
+                        {{ item }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="relative">
+                <div class="overflow-hidden rounded-[2rem] border border-white bg-white p-3 shadow-[0_28px_80px_rgba(157,23,77,.16)]">
+                    <img :src="'/images/hero_fruits.png'" alt="Fresh fruit selection from Willshine Hub" class="h-[26rem] w-full rounded-[1.4rem] object-cover" />
+                </div>
+                <div class="absolute -bottom-6 left-6 rounded-2xl border border-[#FBCFE8] bg-white px-5 py-4 shadow-xl shadow-pink-900/10">
+                    <p class="text-xs font-bold uppercase tracking-[.16em] text-[#BE185D]">Today selection</p>
+                    <p class="mt-1 text-xl font-black text-[#111827]">Quality checked</p>
+                </div>
             </div>
         </section>
 
-        <!-- ── Footer ──────────────────────────────────── -->
-        <footer class="max-w-[1400px] mx-auto px-6 py-10 border-t border-gray-200 mt-10">
-            <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+        <section id="categories" class="public-container py-10">
+            <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                 <div>
-                    <p class="text-sm font-bold text-gray-800">Willshine Hub Buyer Portal</p>
-                    <p class="text-xs text-gray-500 mt-1">© {{ new Date().getFullYear() }} PT TMSX. All rights reserved.</p>
+                    <h2 class="text-3xl font-black tracking-tight text-[#111827]">Shop by Category</h2>
+                    <p class="mt-2 text-sm text-[#6B7280]">Find fresh products by type, packaging, and availability.</p>
                 </div>
-                
-                <div class="flex items-center gap-6 text-xs text-gray-500 font-medium">
-                    <a href="#" class="hover:text-[#b91c63]">Privacy Policy</a>
-                    <a href="#" class="hover:text-[#b91c63]">Terms of Service</a>
-                    <a href="mailto:support@tmsx.co.id" class="hover:text-[#b91c63]">Contact Support</a>
+                <Link href="/products" class="text-sm font-bold text-[#BE185D] hover:underline">View all categories</Link>
+            </div>
+            <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                <Link v-for="category in categories" :key="category.name" href="/products" class="group overflow-hidden rounded-[1.4rem] border border-[#E5E7EB] bg-white p-3 shadow-sm transition hover:-translate-y-1 hover:border-[#FBCFE8] hover:shadow-xl hover:shadow-pink-900/10">
+                    <div class="h-36 overflow-hidden rounded-[1rem] bg-[#FDF2F8]">
+                        <img :src="category.image" :alt="category.name" class="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
+                    </div>
+                    <div class="flex items-center justify-between p-3">
+                        <div>
+                            <h3 class="font-black text-[#111827]">{{ category.name }}</h3>
+                            <p class="mt-1 text-sm text-[#6B7280]">{{ category.count }}</p>
+                        </div>
+                        <span class="flex h-10 w-10 items-center justify-center rounded-full bg-[#FCE7F3] text-[#BE185D]">-></span>
+                    </div>
+                </Link>
+            </div>
+        </section>
+
+        <section class="public-container py-10">
+            <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                    <h2 class="text-3xl font-black tracking-tight text-[#111827]">Featured Products</h2>
+                    <p class="mt-2 text-sm text-[#6B7280]">Pilihan produk unggulan yang tersedia untuk Anda.</p>
+                </div>
+                <Link href="/products" class="text-sm font-bold text-[#BE185D] hover:underline">Shop all products</Link>
+            </div>
+            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                <article v-for="product in products" :key="product.id" class="group flex flex-col overflow-hidden rounded-[1.4rem] border border-[#E5E7EB] bg-white p-3 shadow-sm transition hover:-translate-y-1 hover:border-[#FBCFE8] hover:shadow-xl hover:shadow-pink-900/10">
+                    <div class="relative h-52 overflow-hidden rounded-[1rem] bg-[#FDF2F8]">
+                        <img :src="product.image" :alt="product.name" class="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
+                        <span class="absolute left-3 top-3 rounded-full bg-[#EC4899] px-3 py-1 text-xs font-bold text-white">{{ product.badge }}</span>
+                        <button class="absolute right-3 top-3 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-[#BE185D]" aria-label="Save product">
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 7.2a5 5 0 00-8.8-3.2A5 5 0 003.2 7.2C3.2 13 12 19 12 19s8.8-6 8.8-11.8z" /></svg>
+                        </button>
+                    </div>
+                    <div class="flex flex-1 flex-col p-3">
+                        <p class="text-xs font-bold uppercase tracking-[.14em] text-[#BE185D]">{{ product.category }}</p>
+                        <h3 class="mt-2 text-lg font-black leading-tight text-[#111827]">{{ product.name }}</h3>
+                        <p class="mt-2 line-clamp-2 text-sm text-[#6B7280]">{{ product.grade }}</p>
+                        <div class="mt-4 flex items-center justify-between">
+                            <p class="font-black text-[#BE185D]">{{ product.price }} <span class="text-xs font-semibold text-[#9CA3AF]">/ {{ product.uom }}</span></p>
+                            <span class="rounded-full bg-[#DCFCE7] px-3 py-1 text-xs font-bold text-[#166534]">{{ product.stock_status }}</span>
+                        </div>
+                        <Link href="/login" class="mt-5 inline-flex min-h-11 items-center justify-center rounded-xl bg-[#FCE7F3] text-sm font-bold text-[#BE185D] transition hover:bg-[#FBCFE8]">Add to Cart</Link>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <section class="public-container py-10">
+            <div class="grid gap-6 lg:grid-cols-4">
+                <article v-for="benefit in benefits" :key="benefit[0]" class="rounded-[1.4rem] border border-[#E5E7EB] bg-white p-6 shadow-sm">
+                    <div class="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#E8F5EC] text-[#3F7D5A]">
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                    </div>
+                    <h3 class="text-lg font-black text-[#111827]">{{ benefit[0] }}</h3>
+                    <p class="mt-3 text-sm leading-6 text-[#6B7280]">{{ benefit[1] }}</p>
+                </article>
+            </div>
+        </section>
+
+        <section id="promotions" class="public-container py-10">
+            <div class="grid overflow-hidden rounded-[2rem] border border-[#FBCFE8] bg-[#FFF7FB] lg:grid-cols-[.9fr_1.1fr]">
+                <div class="p-8 md:p-10">
+                    <p class="text-sm font-bold uppercase tracking-[.18em] text-[#BE185D]">New to Willshine Hub?</p>
+                    <h2 class="mt-3 text-3xl font-black tracking-tight text-[#111827]">Create your account for faster ordering.</h2>
+                    <p class="mt-4 leading-7 text-[#374151]">Buat akun untuk menikmati pengalaman belanja yang lebih cepat, melihat penawaran khusus, menyimpan alamat, dan memantau pesanan Anda.</p>
+                    <div class="mt-6 grid gap-3 text-sm font-semibold text-[#374151] sm:grid-cols-2">
+                        <span>Faster checkout</span><span>Saved addresses</span><span>Order history</span><span>Reward points</span>
+                    </div>
+                    <a href="mailto:sales@tmsx.co.id" class="mt-8 inline-flex rounded-xl bg-[#EC4899] px-6 py-3 text-sm font-bold text-white">Create Your Account</a>
+                </div>
+                <div id="about" class="bg-white p-8 md:p-10">
+                    <p class="text-sm font-bold uppercase tracking-[.18em] text-[#3F7D5A]">Solutions for Business Customers</p>
+                    <h2 class="mt-3 text-3xl font-black tracking-tight text-[#111827]">Fresh products for recurring business needs.</h2>
+                    <p class="mt-4 leading-7 text-[#374151]">Produk segar untuk restoran, hotel, cafe, reseller, toko buah, distributor, dan kebutuhan usaha lainnya.</p>
+                    <div class="mt-6 grid gap-3 text-sm font-semibold text-[#374151] sm:grid-cols-2">
+                        <span>Bulk purchase</span><span>Grade and packaging options</span><span>Recurring orders</span><span>Clear availability</span>
+                    </div>
+                    <a href="mailto:sales@tmsx.co.id" class="mt-8 inline-flex rounded-xl border border-[#FBCFE8] bg-white px-6 py-3 text-sm font-bold text-[#BE185D]">Register as Business Customer</a>
                 </div>
             </div>
-        </footer>
-    </div>
+        </section>
+
+        <section id="how-to-order" class="public-container py-10">
+            <h2 class="text-3xl font-black tracking-tight text-[#111827]">How to Order</h2>
+            <div class="mt-6 grid gap-4 md:grid-cols-4">
+                <div v-for="(step, index) in steps" :key="step" class="rounded-[1.4rem] border border-[#E5E7EB] bg-white p-6 shadow-sm">
+                    <span class="flex h-11 w-11 items-center justify-center rounded-full bg-[#EC4899] text-sm font-black text-white">{{ index + 1 }}</span>
+                    <h3 class="mt-5 font-black text-[#111827]">{{ step }}</h3>
+                </div>
+            </div>
+        </section>
+
+        <section class="public-container grid gap-6 py-10 lg:grid-cols-3">
+            <article v-for="testimonial in [
+                ['Ari Pratama', 'Restaurant owner', 'Produk rapi, kualitas konsisten, dan informasi kemasan jelas untuk tim dapur kami.'],
+                ['Nadia Putri', 'Fruit store owner', 'Mudah memilih produk dan repeat order untuk kebutuhan toko setiap minggu.'],
+                ['Kevin Hartono', 'Hotel purchasing', 'Pilihan grade membantu kami menyesuaikan kebutuhan buffet dan event.']
+            ]" :key="testimonial[0]" class="rounded-[1.4rem] border border-[#E5E7EB] bg-white p-6 shadow-sm">
+                <div class="text-[#D97706]">★★★★★</div>
+                <p class="mt-4 leading-7 text-[#374151]">"{{ testimonial[2] }}"</p>
+                <div class="mt-6 flex items-center gap-3">
+                    <span class="flex h-11 w-11 items-center justify-center rounded-full bg-[#FCE7F3] font-black text-[#BE185D]">{{ testimonial[0].slice(0, 2) }}</span>
+                    <div>
+                        <p class="font-bold text-[#111827]">{{ testimonial[0] }}</p>
+                        <p class="text-sm text-[#6B7280]">{{ testimonial[1] }}</p>
+                    </div>
+                </div>
+            </article>
+        </section>
+
+        <section class="public-container py-10">
+            <div class="rounded-[2rem] bg-[#111827] p-8 text-white md:p-10">
+                <h2 class="text-3xl font-black tracking-tight">Stay Updated</h2>
+                <p class="mt-3 max-w-2xl text-pink-100">Dapatkan informasi produk terbaru, promo, dan penawaran khusus dari Willshine Hub.</p>
+                <form class="mt-6 flex max-w-xl flex-col gap-3 sm:flex-row">
+                    <input type="email" placeholder="Email address" class="min-h-12 flex-1 rounded-xl border border-white/10 bg-white px-4 text-sm text-[#111827] outline-none" />
+                    <button type="button" class="rounded-xl bg-[#EC4899] px-6 py-3 text-sm font-bold text-white">Subscribe</button>
+                </form>
+            </div>
+        </section>
+    </PublicLayout>
 </template>

@@ -16,8 +16,7 @@ class User extends Authenticatable implements FilamentUser
 
     public function canAccessPanel(Panel $panel): bool
     {
-        // Only internal users (no linked customer_id) can access the Filament Admin Panel
-        return $this->customer_id === null;
+        return blank($this->customer_id);
     }
 
     /**

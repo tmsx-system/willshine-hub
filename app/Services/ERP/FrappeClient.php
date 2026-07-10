@@ -56,9 +56,36 @@ class FrappeClient
         }
 
         $response = Http::withHeaders($this->getHeaders())
+            ->timeout(30)
+            ->retry(2, 500, throw: false)
             ->get($this->buildUrl($endpoint), $query);
 
         return $this->handleResponse($response);
+    }
+
+    public function getMethod(string $method, array $query = [])
+    {
+        if (!$this->isConfigured()) {
+            throw new Exception("ERP settings are not fully configured.");
+        }
+
+        $response = Http::withHeaders($this->getHeaders())
+            ->timeout(30)
+            ->retry(2, 500, throw: false)
+            ->get($this->getMethodUrl($method), $query);
+
+        return $this->handleResponse($response);
+    }
+
+    public function testConnection(): string
+    {
+        $user = $this->getMethod('frappe.auth.get_logged_user');
+
+        if (!is_string($user) || $user === '') {
+            throw new Exception('ERP connection succeeded but returned an invalid user.');
+        }
+
+        return $user;
     }
 
     public function post(string $endpoint, array $data = [])
@@ -68,6 +95,8 @@ class FrappeClient
         }
 
         $response = Http::withHeaders($this->getHeaders())
+            ->timeout(30)
+            ->retry(2, 500, throw: false)
             ->post($this->buildUrl($endpoint), $data);
 
         return $this->handleResponse($response);
@@ -80,6 +109,8 @@ class FrappeClient
         }
 
         $response = Http::withHeaders($this->getHeaders())
+            ->timeout(30)
+            ->retry(2, 500, throw: false)
             ->put($this->buildUrl($endpoint), $data);
 
         return $this->handleResponse($response);
@@ -91,7 +122,10 @@ class FrappeClient
             return $response->json('data') ?? $response->json('message');
         }
 
-        $errorMsg = $response->json('exc') ?? $response->body();
+        $errorMsg = $response->json('exception')
+            ?? $response->json('message')
+            ?? $response->json('exc')
+            ?? $response->body();
         throw new Exception("Frappe API Error ({$response->status()}): " . $errorMsg);
     }
 }

@@ -7,6 +7,7 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
 class ErpItemForm
@@ -15,31 +16,60 @@ class ErpItemForm
     {
         return $schema
             ->components([
-                TextInput::make('erp_item_id')
-                    ->required(),
-                TextInput::make('item_code')
-                    ->required(),
-                TextInput::make('item_name')
-                    ->required(),
-                TextInput::make('item_group'),
-                TextInput::make('stock_uom'),
-                Textarea::make('description')
-                    ->columnSpanFull(),
-                TextInput::make('brand'),
-                FileUpload::make('image_url')
-                    ->image(),
-                FileUpload::make('website_image_url')
-                    ->image(),
-                Toggle::make('is_stock_item')
-                    ->required(),
-                Toggle::make('disabled')
-                    ->required(),
-                Toggle::make('has_batch_no')
-                    ->required(),
-                Toggle::make('has_serial_no')
-                    ->required(),
-                DateTimePicker::make('erp_modified_at'),
-                DateTimePicker::make('last_synced_at'),
+                Section::make('Item Identity')
+                    ->columns(2)
+                    ->schema([
+                        TextInput::make('erp_item_id')
+                            ->label('ERP Item ID')
+                            ->required(),
+                        TextInput::make('item_code')
+                            ->label('Item Code')
+                            ->required(),
+                        TextInput::make('item_name')
+                            ->label('Item Name')
+                            ->required(),
+                        TextInput::make('item_group')
+                            ->label('Item Group'),
+                        TextInput::make('stock_uom')
+                            ->label('Stock UOM'),
+                        TextInput::make('brand'),
+                    ]),
+                Section::make('Content')
+                    ->columns(2)
+                    ->schema([
+                        Textarea::make('description')
+                            ->columnSpanFull(),
+                        FileUpload::make('image_url')
+                            ->label('ERP Image')
+                            ->image(),
+                        FileUpload::make('website_image_url')
+                            ->label('Website Image')
+                            ->image(),
+                    ]),
+                Section::make('Inventory Flags')
+                    ->columns(2)
+                    ->schema([
+                        Toggle::make('is_stock_item')
+                            ->label('Stock Item')
+                            ->required(),
+                        Toggle::make('disabled')
+                            ->label('Disabled')
+                            ->required(),
+                        Toggle::make('has_batch_no')
+                            ->label('Has Batch No')
+                            ->required(),
+                        Toggle::make('has_serial_no')
+                            ->label('Has Serial No')
+                            ->required(),
+                    ]),
+                Section::make('Sync Metadata')
+                    ->columns(2)
+                    ->schema([
+                        DateTimePicker::make('erp_modified_at')
+                            ->label('ERP Modified At'),
+                        DateTimePicker::make('last_synced_at')
+                            ->label('Last Synced At'),
+                    ]),
             ]);
     }
 }

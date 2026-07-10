@@ -25,8 +25,9 @@ class ErpCustomersTable
                     ->searchable(),
                 TextColumn::make('territory')
                     ->searchable(),
-                TextColumn::make('customer_type_id')
-                    ->numeric()
+                TextColumn::make('customerType.name')
+                    ->label('Customer Type')
+                    ->searchable()
                     ->sortable(),
                 TextColumn::make('default_price_list')
                     ->searchable(),

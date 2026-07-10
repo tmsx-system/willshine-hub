@@ -1,9 +1,6 @@
 <script setup>
 import { ref } from 'vue';
-import { Link, router, useForm } from '@inertiajs/vue3';
-import GuestLayout from '@/Layouts/GuestLayout.vue';
-
-defineOptions({ layout: GuestLayout });
+import { Link, useForm } from '@inertiajs/vue3';
 
 const form = useForm({
     email: '',
@@ -18,147 +15,141 @@ function submit() {
         onError: () => form.reset('password'),
     });
 }
-
-// Quick fill demo
-function fillDemo() {
-    form.email = 'hendra@berkah.co.id';
-    form.password = 'password';
-}
 </script>
 
 <template>
-    <div class="min-h-screen flex items-center justify-center p-4">
-        <div class="w-full max-w-md animate-scale-in">
-            <!-- Logo -->
-            <div class="text-center mb-8">
-                <Link href="/" class="inline-flex flex-col items-center gap-3">
-                    <div class="w-16 h-16 rounded-3xl bg-gradient-to-br from-pink-400 to-pink-700 flex items-center justify-center shadow-xl" style="box-shadow: 0 8px 32px rgba(190,24,93,0.35);">
-                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
-                        </svg>
-                    </div>
-                    <div>
-                        <h1 class="text-2xl font-extrabold text-gray-900">Willshine Hub</h1>
-                        <p class="text-sm text-pink-500 font-medium">Buyer Portal — PT TMSX</p>
-                    </div>
+    <main class="min-h-screen bg-[#FFFBFD] p-3 sm:p-5">
+        <div class="mx-auto grid min-h-[calc(100vh-1.5rem)] max-w-[1440px] overflow-hidden rounded-[2rem] border border-[#FBCFE8] bg-white shadow-[0_30px_90px_rgba(157,23,77,.12)] sm:min-h-[calc(100vh-2.5rem)] lg:grid-cols-[1.05fr_.95fr]">
+            <section class="relative hidden overflow-hidden bg-[#FFF7FB] p-10 lg:flex lg:flex-col lg:justify-between xl:p-14">
+                <div class="absolute -right-24 -top-20 h-96 w-96 rounded-full bg-[#FCE7F3] blur-3xl"></div>
+                <div class="absolute -left-24 bottom-10 h-80 w-80 rounded-full bg-[#E8F5EC] blur-3xl"></div>
+
+                <Link href="/" class="relative z-10 flex w-fit items-center gap-3">
+                    <span class="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#FCE7F3] text-lg font-black text-[#BE185D]">W</span>
+                    <span class="text-xl font-black tracking-tight text-[#111827]">Willshine <span class="text-[#EC4899]">Hub</span></span>
                 </Link>
-            </div>
 
-            <!-- Login Card -->
-            <div class="card p-8" style="box-shadow: 0 20px 60px rgba(236, 72, 153, 0.1);">
-                <!-- Header -->
-                <div class="mb-7">
-                    <h2 class="text-xl font-bold text-gray-900">Selamat Datang Kembali</h2>
-                    <p class="text-sm text-gray-500 mt-1">Masuk untuk mengakses portal buyer Anda</p>
-                </div>
+                <div class="relative z-10 max-w-xl">
+                    <p class="text-sm font-bold uppercase tracking-[.2em] text-[#BE185D]">Customer account</p>
+                    <h1 class="mt-5 text-5xl font-black leading-[1.08] tracking-tight text-[#111827] xl:text-6xl">
+                        Welcome back to fresh ordering.
+                    </h1>
+                    <p class="mt-6 max-w-lg text-base leading-7 text-[#374151]">
+                        Shop fresh products, save your delivery details, review orders, and enjoy Willshine Rewards from one account.
+                    </p>
 
-                <!-- Demo banner -->
-                <div class="mb-6 p-3.5 bg-pink-50 border border-pink-100 rounded-2xl flex items-start gap-3">
-                    <span class="text-lg flex-shrink-0">💡</span>
-                    <div>
-                        <p class="text-xs font-semibold text-pink-800">Mode Demo</p>
-                        <p class="text-xs text-pink-600 mt-0.5">
-                            Gunakan akun demo:
-                            <button @click="fillDemo" class="underline font-semibold hover:text-pink-800 transition-colors">Isi otomatis</button>
-                        </p>
+                    <div class="mt-10 overflow-hidden rounded-[2rem] border-4 border-white shadow-2xl shadow-pink-900/15">
+                        <img :src="'/images/hero_fruits.png'" alt="Fresh product selection from Willshine Hub" class="h-72 w-full object-cover" />
+                    </div>
+
+                    <div class="mt-8 grid grid-cols-3 gap-3">
+                        <div v-for="item in ['Saved addresses', 'Order history', 'Reward points']" :key="item" class="rounded-2xl border border-[#E5E7EB] bg-white px-4 py-3 text-sm font-bold text-[#374151] shadow-sm">
+                            {{ item }}
+                        </div>
                     </div>
                 </div>
+            </section>
 
-                <!-- Error message -->
-                <div v-if="form.errors.email || form.errors.password" class="mb-4 p-3.5 bg-red-50 border border-red-100 rounded-2xl">
-                    <p class="text-xs text-red-600 font-medium">{{ form.errors.email || form.errors.password }}</p>
-                </div>
+            <section class="relative flex items-center justify-center px-5 py-10 sm:px-10 lg:px-14 xl:px-20">
+                <div class="absolute right-0 top-0 h-56 w-56 rounded-full bg-[#FCE7F3]/70 blur-3xl"></div>
+                <div class="relative w-full max-w-md">
+                    <div class="mb-10 flex items-center justify-between">
+                        <Link href="/" class="inline-flex items-center gap-2 text-sm font-semibold text-[#6B7280] transition hover:text-[#BE185D]">
+                            <span aria-hidden="true">&larr;</span>
+                            Home
+                        </Link>
+                        <div class="flex items-center gap-2 lg:hidden">
+                            <span class="font-black text-[#111827]">Willshine Hub</span>
+                        </div>
+                    </div>
 
-                <form @submit.prevent="submit" class="space-y-5">
-                    <!-- Email -->
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Email</label>
-                        <div class="relative">
-                            <div class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none">
-                                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"/>
+                    <div class="mb-8">
+                        <p class="text-sm font-bold uppercase tracking-[.18em] text-[#BE185D]">Customer account</p>
+                        <h2 class="mt-3 text-3xl font-black tracking-tight text-[#111827] sm:text-4xl">Welcome Back</h2>
+                        <p class="mt-3 leading-7 text-[#6B7280]">Enter your registered email and password to continue shopping.</p>
+                    </div>
+
+                    <div v-if="form.errors.email || form.errors.password" class="mb-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+                        {{ form.errors.email || form.errors.password }}
+                    </div>
+
+                    <form class="space-y-5" @submit.prevent="submit">
+                        <div>
+                            <label for="email" class="mb-2 block text-sm font-bold text-[#374151]">Email</label>
+                            <div class="relative">
+                                <svg class="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#9CA3AF]" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 7l9 6 9-6M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                 </svg>
+                                <input
+                                    id="email"
+                                    v-model="form.email"
+                                    type="email"
+                                    autocomplete="email"
+                                    required
+                                    placeholder="name@example.com"
+                                    class="h-14 w-full rounded-2xl border border-[#E5E7EB] bg-white pl-12 pr-4 text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#EC4899] focus:ring-4 focus:ring-[#FCE7F3]"
+                                    :class="{ 'border-red-300': form.errors.email }"
+                                />
                             </div>
-                            <input
-                                id="email"
-                                v-model="form.email"
-                                type="email"
-                                autocomplete="email"
-                                placeholder="email@perusahaan.com"
-                                required
-                                class="input-field pl-10"
-                                :class="{ 'border-red-300': form.errors.email }"
-                            />
                         </div>
-                    </div>
 
-                    <!-- Password -->
-                    <div>
-                        <div class="flex items-center justify-between mb-1.5">
-                            <label class="text-sm font-semibold text-gray-700">Password</label>
-                            <a href="#" class="text-xs text-pink-600 hover:text-pink-800 font-medium transition-colors">Lupa password?</a>
-                        </div>
-                        <div class="relative">
-                            <div class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none">
-                                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-                                </svg>
+                        <div>
+                            <div class="mb-2 flex items-center justify-between">
+                                <label for="password" class="text-sm font-bold text-[#374151]">Password</label>
+                                <a href="mailto:support@tmsx.co.id" class="text-xs font-bold text-[#BE185D] hover:underline">Forgot password?</a>
                             </div>
-                            <input
-                                id="password"
-                                v-model="form.password"
-                                :type="showPassword ? 'text' : 'password'"
-                                autocomplete="current-password"
-                                placeholder="••••••••"
-                                required
-                                class="input-field pl-10 pr-11"
-                                :class="{ 'border-red-300': form.errors.password }"
-                            />
-                            <button
-                                type="button"
-                                @click="showPassword = !showPassword"
-                                class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-gray-400 hover:text-gray-600 transition-colors"
-                            >
-                                <svg v-if="!showPassword" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                            <div class="relative">
+                                <svg class="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#9CA3AF]" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M7 10V8a5 5 0 0110 0v2m-11 0h12a2 2 0 012 2v7H4v-7a2 2 0 012-2z" />
                                 </svg>
-                                <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>
-                                </svg>
-                            </button>
+                                <input
+                                    id="password"
+                                    v-model="form.password"
+                                    :type="showPassword ? 'text' : 'password'"
+                                    autocomplete="current-password"
+                                    required
+                                    placeholder="Enter password"
+                                    class="h-14 w-full rounded-2xl border border-[#E5E7EB] bg-white pl-12 pr-12 text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#EC4899] focus:ring-4 focus:ring-[#FCE7F3]"
+                                    :class="{ 'border-red-300': form.errors.password }"
+                                />
+                                <button
+                                    type="button"
+                                    class="absolute right-4 top-1/2 -translate-y-1/2 text-[#9CA3AF] transition hover:text-[#BE185D]"
+                                    :aria-label="showPassword ? 'Hide password' : 'Show password'"
+                                    @click="showPassword = !showPassword"
+                                >
+                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6z" />
+                                        <circle cx="12" cy="12" r="2.5" />
+                                    </svg>
+                                </button>
+                            </div>
                         </div>
-                    </div>
 
-                    <!-- Remember me -->
-                    <label class="flex items-center gap-2.5 cursor-pointer">
-                        <input
-                            v-model="form.remember"
-                            type="checkbox"
-                            class="w-4 h-4 rounded border-gray-300 text-pink-600 focus:ring-pink-400"
-                        />
-                        <span class="text-sm text-gray-600">Ingat saya di perangkat ini</span>
-                    </label>
+                        <label class="flex w-fit cursor-pointer items-center gap-3 text-sm text-[#6B7280]">
+                            <input v-model="form.remember" type="checkbox" class="h-4 w-4 rounded border-[#E5E7EB] text-[#EC4899] focus:ring-[#FCE7F3]" />
+                            Remember me on this device
+                        </label>
 
-                    <!-- Submit -->
-                    <button
-                        type="submit"
-                        :disabled="form.processing"
-                        class="btn-primary w-full justify-center py-3.5 text-base mt-2 relative overflow-hidden"
-                    >
-                        <svg v-if="form.processing" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
-                        </svg>
-                        {{ form.processing ? 'Memverifikasi...' : 'Masuk ke Portal' }}
-                    </button>
-                </form>
-            </div>
+                        <button
+                            type="submit"
+                            :disabled="form.processing"
+                            class="flex h-14 w-full items-center justify-center rounded-2xl bg-[#EC4899] px-6 font-bold text-white shadow-lg shadow-pink-900/15 transition hover:-translate-y-0.5 hover:bg-[#BE185D] disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                            <svg v-if="form.processing" class="mr-2 h-5 w-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0A12 12 0 000 12h4z" />
+                            </svg>
+                            {{ form.processing ? 'Verifying...' : 'Login' }}
+                        </button>
+                    </form>
 
-            <!-- Footer -->
-            <p class="text-center text-xs text-gray-400 mt-6">
-                Belum terdaftar sebagai mitra?
-                <a href="mailto:sales@tmsx.co.id" class="text-pink-600 font-semibold hover:text-pink-800 transition-colors">Hubungi tim sales kami</a>
-            </p>
+                    <p class="mt-8 text-center text-sm text-[#6B7280]">
+                        New to Willshine Hub?
+                        <a href="mailto:sales@tmsx.co.id" class="font-bold text-[#BE185D] hover:underline">Create an account</a>
+                    </p>
+                </div>
+            </section>
         </div>
-    </div>
+    </main>
 </template>

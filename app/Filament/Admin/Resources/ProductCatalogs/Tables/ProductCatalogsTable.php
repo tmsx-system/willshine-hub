@@ -16,15 +16,18 @@ class ProductCatalogsTable
     {
         return $table
             ->columns([
-                TextColumn::make('item_id')
-                    ->numeric()
+                TextColumn::make('item.item_code')
+                    ->label('ERP Item')
                     ->sortable(),
                 TextColumn::make('item_code')
+                    ->label('Catalog Code')
                     ->searchable(),
                 TextColumn::make('item_name')
+                    ->label('Catalog Item Name')
                     ->searchable(),
-                TextColumn::make('category_id')
-                    ->numeric()
+                TextColumn::make('category.name')
+                    ->label('Category')
+                    ->searchable()
                     ->sortable(),
                 TextColumn::make('display_name')
                     ->searchable(),

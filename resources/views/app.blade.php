@@ -4,12 +4,12 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Willshine Hub — Portal pembelian eksklusif untuk mitra bisnis PT TMSX. Kelola pesanan, alokasi stok, dan program reward dalam satu platform.">
+    <meta name="description" content="Willshine Hub - fresh products and quality produce for personal, retail, and business customers.">
     <meta name="theme-color" content="#EC4899">
 
     <!-- Open Graph -->
-    <meta property="og:title" content="Willshine Hub — Buyer Portal PT TMSX">
-    <meta property="og:description" content="Portal pembelian eksklusif untuk mitra bisnis PT TMSX.">
+    <meta property="og:title" content="Willshine Hub - Fresh Products, Selected with Care">
+    <meta property="og:description" content="Shop fresh fruit, produce, promotions, and rewards from Willshine Hub.">
     <meta property="og:type" content="website">
 
     <title inertia>{{ config('app.name', 'Willshine Hub') }}</title>
