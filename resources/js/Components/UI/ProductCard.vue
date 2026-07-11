@@ -20,6 +20,8 @@ const maxQty = computed(() => {
 });
 const hasMaxQty = computed(() => maxQty.value > 0);
 const canIncrease = computed(() => !hasMaxQty.value || qty.value < maxQty.value);
+const hasPrice = computed(() => props.product.can_view_price !== false && props.product.price !== null && props.product.price !== undefined && props.product.price !== '');
+const canAddToCart = computed(() => props.product.stock_status !== 'empty' && hasPrice.value);
 const qty = ref(minQty.value);
 const added = ref(false);
 
@@ -35,7 +37,7 @@ const stockLabel = {
 };
 
 function addToCart() {
-    if (props.product.stock_status === 'empty') return;
+    if (!canAddToCart.value) return;
 
     emit('add-to-cart', { product: props.product, qty: qty.value });
     added.value = true;
@@ -53,6 +55,14 @@ function increaseQty() {
 }
 
 function formatPrice(value) {
+    if (value === null || value === undefined || value === '') {
+        return 'Harga belum tersedia';
+    }
+
+    if (typeof value === 'string' && Number.isNaN(Number(value))) {
+        return value;
+    }
+
     const number = Number(value || 0);
 
     return 'Rp ' + number.toLocaleString('id-ID');
@@ -98,7 +108,7 @@ watch(() => props.product.id, () => {
             <p v-if="product.allocation_note" class="mt-2 text-xs text-gray-500 line-clamp-2">{{ product.allocation_note }}</p>
 
             <div class="mt-auto pt-3">
-                <p class="text-base font-bold text-pink-700">{{ formatPrice(product.price) }}</p>
+                <p class="text-base font-bold text-pink-700">{{ product.can_view_price === false ? 'Hubungi admin' : formatPrice(product.price) }}</p>
                 <p class="text-xs text-gray-400">per {{ product.uom }}</p>
 
                 <div v-if="product.stock_status !== 'empty'" class="mt-3 flex items-center gap-2">
@@ -119,10 +129,15 @@ watch(() => props.product.id, () => {
                     <button
                         type="button"
                         @click="addToCart"
-                        :class="['flex-1 text-xs font-semibold py-2 rounded-xl transition-all duration-300', added ? 'bg-emerald-500 text-white' : 'btn-primary']"
+                        :disabled="!canAddToCart"
+                        :class="[
+                            'flex-1 text-xs font-semibold py-2 rounded-xl transition-all duration-300',
+                            !canAddToCart ? 'cursor-not-allowed bg-gray-100 text-gray-400' : added ? 'bg-emerald-500 text-white' : 'btn-primary'
+                        ]"
                         style="padding-top:8px;padding-bottom:8px;"
                     >
                         <span v-if="added">Ditambahkan</span>
+                        <span v-else-if="!hasPrice">Harga belum ada</span>
                         <span v-else>+ Keranjang</span>
                     </button>
                 </div>

@@ -68,42 +68,42 @@ class ProductCatalogForm
                         Textarea::make('display_description')
                             ->label('Display Description')
                             ->columnSpanFull(),
-                        FileUpload::make('display_image_url')
-                            ->label('Display Image')
-                            ->disk('public')
-                            ->directory('product-catalogs')
-                            ->visibility('public')
-                            ->image()
-                            ->imageEditor()
-                            ->openable()
-                            ->downloadable()
-                            ->getUploadedFileUsing(function (BaseFileUpload $component, string $file, string|array|null $storedFileNames): ?array {
-                                if (str_starts_with($file, 'http://') || str_starts_with($file, 'https://')) {
-                                    return [
-                                        'name' => basename(parse_url($file, PHP_URL_PATH) ?: $file),
-                                        'size' => 0,
-                                        'type' => 'image/*',
-                                        'url' => $file,
-                                    ];
-                                }
+                        // FileUpload::make('display_image_url')
+                        //     ->label('Display Image')
+                        //     ->disk('public')
+                        //     ->directory('product-catalogs')
+                        //     ->visibility('public')
+                        //     ->image()
+                        //     ->imageEditor()
+                        //     ->openable()
+                        //     ->downloadable()
+                        //     ->getUploadedFileUsing(function (BaseFileUpload $component, string $file, string|array|null $storedFileNames): ?array {
+                        //         if (str_starts_with($file, 'http://') || str_starts_with($file, 'https://')) {
+                        //             return [
+                        //                 'name' => basename(parse_url($file, PHP_URL_PATH) ?: $file),
+                        //                 'size' => 0,
+                        //                 'type' => 'image/*',
+                        //                 'url' => $file,
+                        //             ];
+                        //         }
 
-                                $storage = $component->getDisk();
+                        //         $storage = $component->getDisk();
 
-                                try {
-                                    if (! $storage->exists($file)) {
-                                        return null;
-                                    }
+                        //         try {
+                        //             if (! $storage->exists($file)) {
+                        //                 return null;
+                        //             }
 
-                                    return [
-                                        'name' => is_array($storedFileNames) ? ($storedFileNames[$file] ?? basename($file)) : ($storedFileNames ?? basename($file)),
-                                        'size' => $storage->size($file),
-                                        'type' => $storage->mimeType($file),
-                                        'url' => $storage->url($file),
-                                    ];
-                                } catch (\Throwable) {
-                                    return null;
-                                }
-                            }),
+                        //             return [
+                        //                 'name' => is_array($storedFileNames) ? ($storedFileNames[$file] ?? basename($file)) : ($storedFileNames ?? basename($file)),
+                        //                 'size' => $storage->size($file),
+                        //                 'type' => $storage->mimeType($file),
+                        //                 'url' => $storage->url($file),
+                        //             ];
+                        //         } catch (\Throwable) {
+                        //             return null;
+                        //         }
+                        //     }),
                     ]),
 
                 Section::make('Buyer Rules')

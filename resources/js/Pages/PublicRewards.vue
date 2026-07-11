@@ -24,7 +24,7 @@ const rewardIcons = [Truck, BadgePercent, Gift, Ticket];
                 <div>
                     <p class="text-sm font-bold uppercase tracking-[.22em] text-[#BE185D]">Willshine Rewards</p>
                     <h1 class="mt-4 max-w-3xl text-4xl font-black leading-tight tracking-tight text-[#111827] md:text-6xl">
-                        Earn points for every fresh order.
+                        Earn points for every seed, seedling, and fruit order.
                     </h1>
                     <p class="mt-5 max-w-2xl text-lg leading-8 text-[#374151]">
                         Nikmati benefit pelanggan seperti gratis ongkir, diskon belanja, bonus produk, dan penawaran khusus.
@@ -39,18 +39,17 @@ const rewardIcons = [Truck, BadgePercent, Gift, Ticket];
                     </div>
                 </div>
                 <div class="rounded-[2rem] border border-[#FBCFE8] bg-white p-6 shadow-[0_24px_70px_rgba(236,72,153,.16)]">
-                    <p class="text-sm font-bold text-[#6B7280]">Reward progress preview</p>
-                    <div class="mt-5 flex items-end justify-between">
+                    <p class="text-sm font-bold text-[#6B7280]">Reward account</p>
+                    <div class="mt-5">
                         <div>
-                            <p class="text-5xl font-black text-[#BE185D]">900</p>
-                            <p class="mt-1 text-sm font-semibold text-[#6B7280]">available points</p>
+                            <p class="text-3xl font-black text-[#BE185D]">Login to view rewards</p>
+                            <p class="mt-2 text-sm leading-6 text-[#6B7280]">Poin dan benefit pelanggan akan tampil sesuai akun customer Anda.</p>
                         </div>
-                        <span class="rounded-full bg-[#FEF3C7] px-3 py-1 text-xs font-bold text-[#92400E]">Silver</span>
                     </div>
                     <div class="mt-6 h-3 overflow-hidden rounded-full bg-[#FCE7F3]">
-                        <div class="h-full w-[72%] rounded-full bg-[#EC4899]"></div>
+                        <div class="h-full w-0 rounded-full bg-[#EC4899]"></div>
                     </div>
-                    <p class="mt-3 text-sm text-[#6B7280]">100 points to unlock the next reward.</p>
+                    <p class="mt-3 text-sm text-[#6B7280]">Reward aktif mengikuti data akun customer.</p>
                 </div>
             </div>
         </section>

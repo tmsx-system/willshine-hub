@@ -2,11 +2,12 @@
 import { ref, computed } from 'vue';
 import BuyerLayout from '@/Layouts/BuyerLayout.vue';
 import Badge from '@/Components/UI/Badge.vue';
+import { ClipboardList } from 'lucide-vue-next';
 
 defineOptions({ layout: BuyerLayout });
 
 const props = defineProps({
-    orders: { type: Array, required: true },
+    orders: { type: Array, default: () => [] },
 });
 
 const activeFilter = ref('Semua');
@@ -39,13 +40,8 @@ function formatDate(d) {
     return new Date(d).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
 }
 
-// Mock order items for expanded view
-function getOrderItems(orderId) {
-    return [
-        { name: 'Apel Fuji Premium', qty: 5, uom: 'Kg', price: 45000 },
-        { name: 'Stroberi Lokal', qty: 2, uom: 'Box', price: 120000 },
-        { name: 'Susu UHT Full Cream', qty: 12, uom: 'Ltr', price: 18000 },
-    ];
+function getOrderItems(order) {
+    return order.items_detail ?? order.items_list ?? order.lines ?? [];
 }
 </script>
 
@@ -147,7 +143,7 @@ function getOrderItems(orderId) {
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-gray-50">
-                                        <tr v-for="item in getOrderItems(order.id)" :key="item.name">
+                                        <tr v-for="item in getOrderItems(order)" :key="item.id ?? item.name">
                                             <td class="px-4 py-3">
                                                 <p class="font-semibold text-gray-800">{{ item.name }}</p>
                                                 <p class="text-xs text-gray-400">{{ item.uom }}</p>
@@ -155,6 +151,11 @@ function getOrderItems(orderId) {
                                             <td class="px-4 py-3 text-center text-gray-600">{{ item.qty }}</td>
                                             <td class="px-4 py-3 text-right text-gray-600">{{ formatRupiah(item.price) }}</td>
                                             <td class="px-4 py-3 text-right font-semibold text-gray-800">{{ formatRupiah(item.qty * item.price) }}</td>
+                                        </tr>
+                                        <tr v-if="getOrderItems(order).length === 0">
+                                            <td colspan="4" class="px-4 py-6 text-center text-sm text-gray-400">
+                                                Detail item belum tersedia.
+                                            </td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -185,7 +186,7 @@ function getOrderItems(orderId) {
 
         <!-- Empty state -->
         <div v-else class="flex flex-col items-center justify-center py-24 text-center animate-scale-in">
-            <div class="text-6xl mb-4">📋</div>
+            <ClipboardList class="mb-4 h-14 w-14 text-pink-500" />
             <h3 class="text-lg font-bold text-gray-800">Belum ada pesanan</h3>
             <p class="text-sm text-gray-500 mt-1">Pesanan dengan status "{{ activeFilter }}" tidak ditemukan.</p>
             <a href="/buyer/catalog" class="mt-5 btn-primary text-sm">Mulai Pesan</a>

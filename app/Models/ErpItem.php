@@ -21,4 +21,9 @@ class ErpItem extends Model
     {
         return $this->hasOne(ProductCatalog::class, 'item_id');
     }
+
+    public function prices()
+    {
+        return $this->hasMany(ErpItemPrice::class, 'item_code', 'item_code');
+    }
 }

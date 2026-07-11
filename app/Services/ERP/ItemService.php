@@ -3,6 +3,9 @@
 namespace App\Services\ERP;
 
 use App\Models\ErpItem;
+use App\Models\ErpItemPrice;
+use App\Models\ErpCustomer;
+use App\Models\CustomerType;
 use App\Models\ProductCatalog;
 use App\Models\ProductCategory;
 use Exception;
@@ -127,6 +130,12 @@ class ItemService
                 $setting->update(['last_sync_item' => now()]);
             }
 
+            try {
+                $this->syncPrices();
+            } catch (Exception $priceException) {
+                Log::warning('Item sync completed but price sync was skipped: ' . $priceException->getMessage());
+            }
+
             return true;
         } catch (Exception $e) {
             Log::error("Failed to sync items: " . $e->getMessage());
@@ -144,6 +153,12 @@ class ItemService
             return null;
         }
 
+        $warehouses = $warehouse ? [$warehouse] : $this->warehousesForCompany($company);
+
+        if ($warehouse || $warehouses !== []) {
+            return $this->itemCodesForWarehouses($warehouses);
+        }
+
         if ($company) {
             $companyItemCodes = $this->itemCodesForCompany($company);
 
@@ -152,14 +167,17 @@ class ItemService
             }
         }
 
-        $warehouses = $warehouse ? [$warehouse] : $this->warehousesForCompany($company);
-
-        if ($warehouses === []) {
+        if ($warehouse || $company) {
             Log::warning("Item sync skipped company filter because no warehouses were found for company: {$company}");
 
             return [];
         }
 
+        return null;
+    }
+
+    private function itemCodesForWarehouses(array $warehouses): array
+    {
         $codes = [];
 
         foreach ($warehouses as $warehouseName) {
@@ -187,6 +205,84 @@ class ItemService
         }
 
         return array_values(array_unique($codes));
+    }
+
+    public function syncPrices(): bool
+    {
+        try {
+            $setting = $this->client->getSetting();
+            $priceLists = collect([
+                $setting?->default_selling_price_list,
+                ...ErpCustomer::query()
+                    ->whereNotNull('default_price_list')
+                    ->pluck('default_price_list')
+                    ->all(),
+                ...CustomerType::query()
+                    ->whereNotNull('default_price_list')
+                    ->pluck('default_price_list')
+                    ->all(),
+            ])
+                ->filter()
+                ->unique()
+                ->values();
+
+            if ($priceLists->isEmpty()) {
+                throw new Exception('No price list found. Set Default Selling Price List in ERP Settings or sync customers with Default Price List first.');
+            }
+
+            $syncedPriceIds = [];
+
+            foreach ($priceLists as $priceList) {
+                $start = 0;
+                $limit = 500;
+
+                do {
+                    $prices = $this->client->get('Item Price', [
+                        'fields' => '["name", "item_code", "price_list", "price_list_rate", "currency", "uom", "valid_from", "valid_upto", "modified"]',
+                        'filters' => json_encode([
+                            ['price_list', '=', $priceList],
+                            ['selling', '=', 1],
+                        ]),
+                        'limit_page_length' => $limit,
+                        'limit_start' => $start,
+                    ]);
+
+                    foreach ($prices as $data) {
+                        if (empty($data['item_code']) || empty($data['price_list'])) {
+                            continue;
+                        }
+
+                        $price = ErpItemPrice::updateOrCreate(
+                            ['erp_price_id' => $data['name']],
+                            [
+                                'item_code' => $data['item_code'],
+                                'price_list' => $data['price_list'],
+                                'price_list_rate' => $data['price_list_rate'] ?? 0,
+                                'currency' => $data['currency'] ?? null,
+                                'uom' => $data['uom'] ?? null,
+                                'valid_from' => $data['valid_from'] ?? null,
+                                'valid_upto' => $data['valid_upto'] ?? null,
+                                'erp_modified_at' => isset($data['modified']) ? \Carbon\Carbon::parse($data['modified']) : null,
+                                'last_synced_at' => now(),
+                            ],
+                        );
+
+                        $syncedPriceIds[] = $price->id;
+                    }
+
+                    $start += $limit;
+                } while (count($prices) === $limit);
+            }
+
+            if ($setting) {
+                $setting->update(['last_sync_price' => now()]);
+            }
+
+            return true;
+        } catch (Exception $e) {
+            Log::error("Failed to sync item prices: " . $e->getMessage());
+            throw $e;
+        }
     }
 
     private function itemCodesForCompany(string $company): array

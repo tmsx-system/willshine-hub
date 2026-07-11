@@ -34,15 +34,15 @@ const products = computed(() => {
 const categories = computed(() => props.categories);
 
 const heroBenefits = [
-    { label: 'Fresh Selection', icon: Leaf },
+    { label: 'Benih Pilihan', icon: Leaf },
     { label: 'Quality Checked', icon: BadgeCheck },
     { label: 'Reliable Supply', icon: Truck },
     { label: 'Easy Ordering', icon: ShoppingCart },
 ];
 
 const benefits = [
-    { title: 'Fresh Product Selection', desc: 'Produk dipilih berdasarkan standar kualitas dan kesegaran.', icon: Leaf },
-    { title: 'Clear Product Information', desc: 'Informasi grade, kemasan, satuan, dan harga ditampilkan dengan jelas.', icon: PackageSearch },
+    { title: 'Benih, Bibit, dan Buah Pilihan', desc: 'Produk dipilih berdasarkan standar kualitas, daya tumbuh, dan kesegaran.', icon: Leaf },
+    { title: 'Informasi Produk Jelas', desc: 'Informasi varietas, grade, kemasan, satuan, dan harga ditampilkan dengan jelas.', icon: PackageSearch },
     { title: 'Easy Ordering', desc: 'Proses pemesanan sederhana dari berbagai perangkat.', icon: ShoppingCart },
     { title: 'Reliable Service', desc: 'Dukungan untuk kebutuhan pelanggan pribadi maupun bisnis.', icon: ShieldCheck },
 ];
@@ -62,13 +62,13 @@ const steps = [
                 <div>
                     <p class="inline-flex items-center gap-2 text-sm font-black uppercase tracking-[.2em] text-[#DB2777]">
                         <Sparkles class="h-4 w-4" />
-                        Premium fresh produce
+                        Benih, bibit, dan buah-buahan
                     </p>
                     <h1 class="mt-4 max-w-4xl text-4xl font-black leading-[1.05] tracking-tight text-[#111827] sm:text-5xl lg:text-6xl">
-                        Fresh Products, Selected with Care
+                        Produk Pertanian Pilihan untuk Kebutuhan Anda
                     </h1>
                     <p class="mt-5 max-w-2xl text-base leading-7 text-[#374151] md:text-lg">
-                        Temukan pilihan buah segar dan produk berkualitas untuk kebutuhan rumah, usaha, dan pembelian rutin Anda.
+                        Temukan benih, bibit tanaman, dan buah-buahan berkualitas untuk kebutuhan rumah, kebun, usaha, dan pembelian rutin Anda.
                     </p>
                     <div class="mt-8 flex flex-col gap-3 sm:flex-row">
                         <Link href="/products" class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[#EC4899] px-6 py-3 text-sm font-black text-white shadow-[0_18px_40px_rgba(236,72,153,.28)] transition hover:-translate-y-0.5 hover:bg-[#BE185D] hover:shadow-[0_24px_52px_rgba(190,24,93,.28)]">
@@ -121,7 +121,7 @@ const steps = [
             <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                 <div>
                     <h2 class="text-3xl font-black tracking-tight text-[#111827]">Shop by Category</h2>
-                    <p class="mt-2 text-sm text-[#6B7280]">Find fresh products by type, packaging, and availability.</p>
+                    <p class="mt-2 text-sm text-[#6B7280]">Temukan benih, bibit, dan buah-buahan berdasarkan kategori, kemasan, dan ketersediaan.</p>
                 </div>
                 <a href="/#categories" class="inline-flex items-center gap-2 text-sm font-black text-[#BE185D] hover:text-[#9D174D]">
                     View all categories
@@ -229,8 +229,8 @@ const steps = [
                 </div>
                 <div class="bg-white p-8 md:p-10">
                     <p class="text-sm font-black uppercase tracking-[.18em] text-[#3F7D5A]">Solutions for Business Customers</p>
-                    <h2 class="mt-3 text-3xl font-black tracking-tight text-[#111827]">Fresh products for recurring business needs.</h2>
-                    <p class="mt-4 leading-7 text-[#374151]">Produk segar untuk restoran, hotel, cafe, reseller, toko buah, distributor, dan kebutuhan usaha lainnya.</p>
+                    <h2 class="mt-3 text-3xl font-black tracking-tight text-[#111827]">Benih, bibit, dan buah untuk kebutuhan bisnis berulang.</h2>
+                    <p class="mt-4 leading-7 text-[#374151]">Produk pertanian untuk reseller, toko buah, kebun, restoran, hotel, cafe, distributor, dan kebutuhan usaha lainnya.</p>
                     <div class="mt-6 grid gap-3 text-sm font-semibold text-[#374151] sm:grid-cols-2">
                         <span class="inline-flex items-center gap-2"><CheckCircle2 class="h-4 w-4 text-[#3F7D5A]" /> Bulk purchase</span>
                         <span class="inline-flex items-center gap-2"><CheckCircle2 class="h-4 w-4 text-[#3F7D5A]" /> Grade options</span>

@@ -33,14 +33,14 @@ function submit() {
                 <div class="relative z-10 max-w-xl">
                     <p class="text-sm font-bold uppercase tracking-[.2em] text-[#BE185D]">Customer account</p>
                     <h1 class="mt-5 text-5xl font-black leading-[1.08] tracking-tight text-[#111827] xl:text-6xl">
-                        Welcome back to fresh ordering.
+                        Welcome back to seed, seedling, and fruit ordering.
                     </h1>
                     <p class="mt-6 max-w-lg text-base leading-7 text-[#374151]">
-                        Shop fresh products, save your delivery details, review orders, and enjoy Willshine Rewards from one account.
+                        Shop seeds, seedlings, and fruits, save your delivery details, review orders, and enjoy Willshine Rewards from one account.
                     </p>
 
                     <div class="mt-10 overflow-hidden rounded-[2rem] border-4 border-white shadow-2xl shadow-pink-900/15">
-                        <img :src="'/images/hero_fruits.png'" alt="Fresh product selection from Willshine Hub" class="h-72 w-full object-cover" />
+                        <img :src="'/images/hero_fruits.png'" alt="Seed, seedling, and fruit selection from Willshine Hub" class="h-72 w-full object-cover" />
                     </div>
 
                     <div class="mt-8 grid grid-cols-3 gap-3">
@@ -95,7 +95,7 @@ function submit() {
                         <div>
                             <div class="mb-2 flex items-center justify-between">
                                 <label for="password" class="text-sm font-bold text-[#374151]">Password</label>
-                                <a href="mailto:support@tmsx.co.id" class="text-xs font-bold text-[#BE185D] hover:underline">Forgot password?</a>
+                                <Link href="/forgot-password" class="text-xs font-bold text-[#BE185D] hover:underline">Forgot password?</Link>
                             </div>
                             <div class="relative">
                                 <LockKeyhole class="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#EC4899]" />

@@ -12,7 +12,7 @@ const normalizedProducts = computed(() => {
     return props.products.map((product) => ({
         ...product,
         price: product.price || 'Hubungi kami',
-        packaging: product.packaging || product.grade || product.uom || 'Fresh product',
+        packaging: product.packaging || product.grade || product.uom || 'Produk pertanian',
         stock_status: product.stock_status || 'Tersedia',
         badge: product.badge || null,
     }));
@@ -117,12 +117,12 @@ const filteredProducts = computed(() => {
     <PublicLayout active="products">
         <section class="bg-[#FFF7FB]">
             <div class="public-container py-12 lg:py-16">
-                <p class="text-sm font-bold uppercase tracking-[.22em] text-[#BE185D]">Shop Fresh Products</p>
+                <p class="text-sm font-bold uppercase tracking-[.22em] text-[#BE185D]">Shop Seeds, Seedlings, and Fruits</p>
                 <h1 class="mt-4 max-w-3xl text-4xl font-black leading-tight tracking-tight text-[#111827] md:text-6xl">
-                    Jelajahi pilihan produk berkualitas.
+                    Jelajahi benih, bibit, dan buah-buahan berkualitas.
                 </h1>
                 <p class="mt-5 max-w-2xl text-lg leading-8 text-[#374151]">
-                    Jelajahi pilihan produk berkualitas untuk kebutuhan pribadi maupun bisnis.
+                    Pilih produk pertanian untuk kebutuhan kebun, rumah, reseller, toko buah, dan bisnis berulang.
                 </p>
             </div>
         </section>
@@ -136,7 +136,7 @@ const filteredProducts = computed(() => {
                         <input
                             v-model="search"
                             type="search"
-                            placeholder="Search products, categories, or item names"
+                            placeholder="Search seeds, seedlings, fruits, categories, or item names"
                             class="h-12 w-full rounded-2xl border border-[#E5E7EB] bg-white pl-12 pr-4 text-sm font-medium text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#EC4899] focus:ring-4 focus:ring-[#FCE7F3]"
                         />
                     </label>

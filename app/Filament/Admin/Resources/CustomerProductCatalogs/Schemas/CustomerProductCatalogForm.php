@@ -58,7 +58,8 @@ class CustomerProductCatalogForm
                         Textarea::make('note')
                             ->label('Internal Note')
                             ->columnSpanFull(),
-                    ]),
+                    ])
+                    ->ColumnSpanFull(),
             ]);
     }
 }

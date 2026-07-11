@@ -141,6 +141,12 @@ class CustomerService
                 $setting->update(['last_sync_customer' => now()]);
             }
 
+            try {
+                app(ItemService::class)->syncPrices();
+            } catch (Exception $priceException) {
+                Log::warning('Customer sync completed but price sync was skipped: ' . $priceException->getMessage());
+            }
+
             return true;
         } catch (Exception $e) {
             Log::error("Failed to sync customers: " . $e->getMessage());

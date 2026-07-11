@@ -1,55 +1,85 @@
 <script setup>
-import { ref, computed } from 'vue';
-import BuyerLayout from '@/Layouts/BuyerLayout.vue';
+import { computed, ref, watch } from 'vue';
 import { router } from '@inertiajs/vue3';
+import { CheckCircle2, Clock3, LoaderCircle, Package, ShoppingCart } from 'lucide-vue-next';
+import BuyerLayout from '@/Layouts/BuyerLayout.vue';
 
 defineOptions({ layout: BuyerLayout });
 
-// Mock cart data (in production, this would come from localStorage or server)
-const cartItems = ref([
-    { id: 1, name: 'Apel Fuji Premium',  category: 'Fresh',  uom: 'Kg',  price: 45000,  qty: 5,  grade: 'Grade A'  },
-    { id: 4, name: 'Keju Mozzarella',    category: 'Dairy',  uom: 'Kg',  price: 95000,  qty: 2,  grade: 'Grade A'  },
-    { id: 5, name: 'Susu UHT Full Cream',category: 'Dairy',  uom: 'Ltr', price: 18000,  qty: 12, grade: 'Grade B'  },
-]);
+const props = defineProps({
+    items: { type: Array, default: () => [] },
+});
 
+const CART_STORAGE_KEY = 'willshine_buyer_cart';
+
+function loadCartItems() {
+    if (props.items.length) return props.items.map(item => ({ ...item }));
+    if (typeof window === 'undefined') return [];
+
+    try {
+        const stored = window.localStorage.getItem(CART_STORAGE_KEY);
+
+        return stored ? JSON.parse(stored) : [];
+    } catch {
+        return [];
+    }
+}
+
+const cartItems = ref(loadCartItems());
 const notes = ref('');
 const paymentMethod = ref('transfer');
 const isSubmitting = ref(false);
 const submitted = ref(false);
 
-const subtotal = computed(() => cartItems.value.reduce((s, i) => s + i.price * i.qty, 0));
-const tax = computed(() => Math.round(subtotal.value * 0.11)); // 11% PPN
+watch(cartItems, items => {
+    if (typeof window === 'undefined') return;
+    window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
+}, { deep: true });
+
+const subtotal = computed(() => cartItems.value.reduce((sum, item) => sum + Number(item.price || 0) * Number(item.qty || 0), 0));
+const tax = computed(() => Math.round(subtotal.value * 0.11));
 const total = computed(() => subtotal.value + tax.value);
 
-const categoryIcon = {
-    Fresh:  '🥬', Frozen: '❄️', Dairy: '🧀',
-    Beverages: '🧃', Snacks: '🍪', Organic: '🌿',
-};
-
 function updateQty(item, delta) {
-    item.qty = Math.max(1, item.qty + delta);
+    item.qty = Math.max(1, Number(item.qty || 1) + delta);
 }
 
 function removeItem(id) {
-    cartItems.value = cartItems.value.filter(i => i.id !== id);
+    cartItems.value = cartItems.value.filter(item => item.id !== id);
 }
 
-function formatRupiah(n) {
-    return 'Rp ' + n.toLocaleString('id-ID');
+function formatRupiah(value) {
+    return 'Rp ' + Number(value || 0).toLocaleString('id-ID');
 }
 
-async function submitOrder() {
-    isSubmitting.value = true;
-    await new Promise(r => setTimeout(r, 1500)); // simulate API call
-    isSubmitting.value = false;
-    submitted.value = true;
+function submitOrder() {
+    if (cartItems.value.length === 0) return;
+
+    router.post('/buyer/cart/submit', {
+        items: cartItems.value,
+        notes: notes.value,
+        payment_method: paymentMethod.value,
+    }, {
+        preserveScroll: true,
+        onStart: () => {
+            isSubmitting.value = true;
+        },
+        onSuccess: () => {
+            cartItems.value = [];
+            if (typeof window !== 'undefined') {
+                window.localStorage.removeItem(CART_STORAGE_KEY);
+            }
+            submitted.value = true;
+        },
+        onFinish: () => {
+            isSubmitting.value = false;
+        },
+    });
 }
 </script>
 
 <template>
     <div class="px-4 sm:px-6 lg:px-8 py-6 max-w-7xl mx-auto">
-
-        <!-- ── Header ──────────────────────────────────── -->
         <div class="mb-6 animate-fade-in-up">
             <h2 class="text-xl font-extrabold text-gray-900">Keranjang Pesanan</h2>
             <p class="text-sm text-gray-500 mt-0.5">
@@ -57,13 +87,14 @@ async function submitOrder() {
             </p>
         </div>
 
-        <!-- ── Success State ───────────────────────────── -->
         <div v-if="submitted" class="flex flex-col items-center justify-center py-20 text-center animate-scale-in">
-            <div class="w-24 h-24 bg-emerald-100 rounded-full flex items-center justify-center text-5xl mb-6">✅</div>
-            <h3 class="text-2xl font-extrabold text-gray-900">Pesanan Berhasil Dibuat!</h3>
-            <p class="text-gray-500 mt-2 max-w-md">Pesanan Anda telah dikirim dan sedang menunggu persetujuan dari tim admin. Anda akan mendapat notifikasi segera.</p>
+            <div class="mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-emerald-100">
+                <CheckCircle2 class="h-12 w-12 text-emerald-600" />
+            </div>
+            <h3 class="text-2xl font-extrabold text-gray-900">Pesanan Berhasil Dibuat</h3>
+            <p class="text-gray-500 mt-2 max-w-md">Pesanan Anda telah dikirim dan sedang menunggu persetujuan dari tim admin.</p>
             <div class="mt-4 inline-flex items-center gap-2 bg-amber-50 border border-amber-100 rounded-2xl px-4 py-2">
-                <span class="text-amber-500">⏳</span>
+                <Clock3 class="h-4 w-4 text-amber-500" />
                 <span class="text-sm font-semibold text-amber-700">Status: Menunggu Persetujuan</span>
             </div>
             <div class="flex gap-3 mt-8">
@@ -72,41 +103,37 @@ async function submitOrder() {
             </div>
         </div>
 
-        <!-- ── Empty Cart ──────────────────────────────── -->
         <div v-else-if="cartItems.length === 0" class="flex flex-col items-center justify-center py-24 text-center animate-scale-in">
-            <div class="text-7xl mb-5">🛒</div>
+            <ShoppingCart class="mb-5 h-16 w-16 text-pink-500" />
             <h3 class="text-lg font-bold text-gray-800">Keranjang Anda kosong</h3>
             <p class="text-sm text-gray-500 mt-1">Tambahkan produk dari katalog untuk mulai memesan.</p>
             <a href="/buyer/catalog" class="mt-6 btn-primary text-sm">Jelajahi Katalog</a>
         </div>
 
-        <!-- ── Cart Content ─────────────────────────────── -->
         <div v-else class="grid lg:grid-cols-3 gap-6">
-
-            <!-- Cart Items (left) -->
             <div class="lg:col-span-2 space-y-3 animate-fade-in-up">
                 <div
-                    v-for="(item, i) in cartItems"
+                    v-for="(item, index) in cartItems"
                     :key="item.id"
                     class="card p-5 flex items-center gap-4 animate-fade-in-up"
-                    :style="{ animationDelay: i * 60 + 'ms' }"
+                    :style="{ animationDelay: index * 60 + 'ms' }"
                 >
-                    <!-- Category icon -->
-                    <div class="w-14 h-14 bg-gradient-to-br from-pink-50 to-pink-100 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0">
-                        {{ categoryIcon[item.category] ?? '📦' }}
+                    <div class="w-14 h-14 bg-gradient-to-br from-pink-50 to-pink-100 rounded-2xl flex items-center justify-center flex-shrink-0">
+                        <Package class="h-7 w-7 text-pink-500" />
                     </div>
 
-                    <!-- Details -->
                     <div class="flex-1 min-w-0">
                         <p class="font-bold text-gray-900 text-sm leading-tight">{{ item.name }}</p>
-                        <p class="text-xs text-gray-400 mt-0.5">{{ item.grade }} · per {{ item.uom }}</p>
-                        <p class="text-sm font-bold text-pink-700 mt-1">{{ formatRupiah(item.price) }}<span class="text-xs font-normal text-gray-400">/{{ item.uom }}</span></p>
+                        <p class="text-xs text-gray-400 mt-0.5">{{ item.grade }} / per {{ item.uom }}</p>
+                        <p class="text-sm font-bold text-pink-700 mt-1">
+                            {{ formatRupiah(item.price) }}
+                            <span class="text-xs font-normal text-gray-400">/{{ item.uom }}</span>
+                        </p>
                     </div>
 
-                    <!-- Qty stepper -->
                     <div class="flex flex-col items-end gap-2">
                         <div class="flex items-center border border-gray-200 rounded-xl overflow-hidden">
-                            <button @click="updateQty(item, -1)" class="px-3 py-2 text-gray-500 hover:bg-pink-50 hover:text-pink-700 transition-colors font-bold text-sm">−</button>
+                            <button @click="updateQty(item, -1)" class="px-3 py-2 text-gray-500 hover:bg-pink-50 hover:text-pink-700 transition-colors font-bold text-sm">-</button>
                             <span class="px-4 py-2 text-sm font-bold text-gray-800 min-w-[2.5rem] text-center">{{ item.qty }}</span>
                             <button @click="updateQty(item, 1)" class="px-3 py-2 text-gray-500 hover:bg-pink-50 hover:text-pink-700 transition-colors font-bold text-sm">+</button>
                         </div>
@@ -115,24 +142,16 @@ async function submitOrder() {
                     </div>
                 </div>
 
-                <!-- Notes field -->
                 <div class="card p-5 animate-fade-in-up delay-300">
                     <label class="block text-sm font-bold text-gray-700 mb-2">Catatan Pesanan</label>
-                    <textarea
-                        v-model="notes"
-                        rows="3"
-                        placeholder="Tambahkan catatan untuk pesanan ini (opsional)..."
-                        class="input-field resize-none"
-                    />
+                    <textarea v-model="notes" rows="3" placeholder="Tambahkan catatan untuk pesanan ini (opsional)..." class="input-field resize-none" />
                 </div>
             </div>
 
-            <!-- Order Summary (right) -->
             <div class="animate-fade-in-up delay-200">
                 <div class="card p-6 sticky top-24">
                     <h3 class="font-bold text-gray-900 mb-5 text-base">Ringkasan Pesanan</h3>
 
-                    <!-- Price breakdown -->
                     <div class="space-y-3 pb-4 border-b border-gray-100">
                         <div class="flex justify-between text-sm">
                             <span class="text-gray-600">Subtotal ({{ cartItems.length }} produk)</span>
@@ -149,7 +168,6 @@ async function submitOrder() {
                         <span class="text-xl font-extrabold text-pink-700">{{ formatRupiah(total) }}</span>
                     </div>
 
-                    <!-- Payment method -->
                     <div class="mt-4 space-y-2">
                         <p class="text-sm font-bold text-gray-700">Metode Pembayaran</p>
                         <label class="flex items-center gap-3 p-3 rounded-xl border border-gray-200 cursor-pointer hover:border-pink-300 transition-colors" :class="paymentMethod === 'transfer' ? 'border-pink-400 bg-pink-50' : ''">
@@ -168,22 +186,13 @@ async function submitOrder() {
                         </label>
                     </div>
 
-                    <!-- Status info -->
                     <div class="mt-4 p-3.5 bg-amber-50 border border-amber-100 rounded-2xl flex gap-2.5">
-                        <span class="text-sm flex-shrink-0">⏳</span>
-                        <p class="text-xs text-amber-700">Pesanan akan masuk status <strong>Menunggu Persetujuan</strong> dan diproses oleh tim admin dalam 1×24 jam.</p>
+                        <Clock3 class="h-4 w-4 flex-shrink-0 text-amber-500" />
+                        <p class="text-xs text-amber-700">Pesanan akan masuk status <strong>Menunggu Persetujuan</strong> dan diproses oleh tim admin dalam 1x24 jam.</p>
                     </div>
 
-                    <!-- Submit button -->
-                    <button
-                        @click="submitOrder"
-                        :disabled="isSubmitting"
-                        class="btn-primary w-full justify-center mt-5 py-3.5 text-base"
-                    >
-                        <svg v-if="isSubmitting" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
-                        </svg>
+                    <button @click="submitOrder" :disabled="isSubmitting" class="btn-primary w-full justify-center mt-5 py-3.5 text-base">
+                        <LoaderCircle v-if="isSubmitting" class="-ml-1 mr-2 h-4 w-4 animate-spin text-white" />
                         {{ isSubmitting ? 'Memproses...' : 'Kirim Pesanan' }}
                     </button>
                 </div>

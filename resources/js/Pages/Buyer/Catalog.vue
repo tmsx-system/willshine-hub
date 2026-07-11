@@ -1,8 +1,9 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import BuyerLayout from '@/Layouts/BuyerLayout.vue';
 import ProductCard from '@/Components/UI/ProductCard.vue';
 import SearchInput from '@/Components/UI/SearchInput.vue';
+import { CheckCircle2, SearchX } from 'lucide-vue-next';
 
 defineOptions({ layout: BuyerLayout });
 
@@ -14,7 +15,26 @@ const props = defineProps({
 
 const activeCategory = ref('Semua');
 const searchQuery = ref('');
-const cartItems = ref([]);
+const CART_STORAGE_KEY = 'willshine_buyer_cart';
+
+function loadCartItems() {
+    if (typeof window === 'undefined') return [];
+
+    try {
+        const stored = window.localStorage.getItem(CART_STORAGE_KEY);
+
+        return stored ? JSON.parse(stored) : [];
+    } catch {
+        return [];
+    }
+}
+
+const cartItems = ref(loadCartItems());
+
+watch(cartItems, items => {
+    if (typeof window === 'undefined') return;
+    window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
+}, { deep: true });
 
 const filteredProducts = computed(() => {
     let list = props.products;
@@ -129,7 +149,7 @@ const stockCounts = computed(() => ({
 
         <!-- Empty state -->
         <div v-else class="flex flex-col items-center justify-center py-24 text-center animate-scale-in">
-            <div class="text-6xl mb-4">🔍</div>
+            <SearchX class="mb-4 h-14 w-14 text-pink-500" />
             <h3 class="text-lg font-bold text-gray-800">Produk tidak ditemukan</h3>
             <p class="text-sm text-gray-500 mt-1 max-w-xs">Coba kata kunci lain atau ganti filter kategori.</p>
             <button @click="searchQuery = ''; activeCategory = 'Semua'" class="mt-5 btn-secondary">
@@ -161,7 +181,7 @@ const stockCounts = computed(() => ({
                 v-if="showCartToast"
                 class="fixed top-20 right-4 z-50 glass rounded-2xl px-5 py-3 flex items-center gap-3 shadow-lg shadow-pink-100 animate-slide-right"
             >
-                <span class="text-lg">✅</span>
+                <CheckCircle2 class="h-5 w-5 text-emerald-600" />
                 <p class="text-sm font-semibold text-gray-800">Produk ditambahkan ke keranjang</p>
             </div>
         </Transition>

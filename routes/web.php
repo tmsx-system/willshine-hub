@@ -1,13 +1,18 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\Admin\ErpSettingSyncController;
 use App\Models\CustomerProductCatalog;
+use App\Models\ErpItemPrice;
 use App\Models\ErpSetting;
 use App\Models\ErpItem;
 use App\Models\ProductCategory;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
 $publicImageUrl = function (?string $path): ?string {
@@ -71,73 +76,37 @@ $publicCategories = function () use ($publicImageUrl) {
         ]);
 };
 
-$publicRewards = fn () => [
-    [
-        'id' => 1,
-        'name' => 'Gratis Ongkir',
-        'points' => '350 poin',
-        'desc' => 'Tukar poin untuk bebas biaya pengiriman pesanan berikutnya.',
-        'icon' => 'M8 7h8m-8 5h8m-8 5h5M5 7h.01M5 12h.01M5 17h.01',
-    ],
-    [
-        'id' => 2,
-        'name' => 'Diskon Belanja 5%',
-        'points' => '500 poin',
-        'desc' => 'Potongan untuk pembelian katalog buah segar pilihan.',
-        'icon' => 'M9 14l6-6m-5.5.5h.01m5 5h.01M19 5L5 19',
-    ],
-    [
-        'id' => 3,
-        'name' => 'Bonus Produk',
-        'points' => '750 poin',
-        'desc' => 'Dapatkan tambahan produk contoh untuk pesanan tertentu.',
-        'icon' => 'M20 12v7a2 2 0 01-2 2H6a2 2 0 01-2-2v-7m16 0H4m16 0a2 2 0 100-4H4a2 2 0 100 4m8-4v13m0-13V6a2 2 0 114 0c0 2-4 2-4 2zm0 0V6a2 2 0 10-4 0c0 2 4 2 4 2z',
-    ],
-];
+$erpItemPrice = function (string $itemCode, ?string $uom, ?string $priceList): ?float {
+    if (!$priceList) {
+        return null;
+    }
 
-$buyerRewards = fn () => [
-    [
-        'id' => 1,
-        'name' => 'Gratis Ongkir Jabodetabek',
-        'category' => 'Shipping',
-        'points' => 350,
-        'valid' => '2026-12-31',
-    ],
-    [
-        'id' => 2,
-        'name' => 'Diskon Belanja 5%',
-        'category' => 'Discount',
-        'points' => 500,
-        'valid' => '2026-12-31',
-    ],
-    [
-        'id' => 3,
-        'name' => 'Cashback 25.000',
-        'category' => 'Cashback',
-        'points' => 650,
-        'valid' => '2026-12-31',
-    ],
-    [
-        'id' => 4,
-        'name' => 'Bonus Pisang Cavendish 1 Kg',
-        'category' => 'Gift',
-        'points' => 750,
-        'valid' => '2026-12-31',
-    ],
-    [
-        'id' => 5,
-        'name' => 'Prioritas Packing Pesanan',
-        'category' => 'Service',
-        'points' => 900,
-        'valid' => '2026-12-31',
-    ],
-];
+    if (!Schema::hasTable('erp_item_prices')) {
+        return null;
+    }
 
-$rewardHistory = fn () => [
-    ['type' => 'earn', 'description' => 'Bonus registrasi pelanggan', 'points' => 250, 'date' => '2026-07-01'],
-    ['type' => 'earn', 'description' => 'Simulasi pembelian katalog buah', 'points' => 400, 'date' => '2026-07-05'],
-    ['type' => 'redeem', 'description' => 'Contoh penukaran gratis ongkir', 'points' => -350, 'date' => '2026-07-08'],
-];
+    $today = now()->toDateString();
+
+    $query = ErpItemPrice::query()
+        ->where('item_code', $itemCode)
+        ->where('price_list', $priceList)
+        ->where(function ($query) use ($today) {
+            $query->whereNull('valid_from')->orWhere('valid_from', '<=', $today);
+        })
+        ->where(function ($query) use ($today) {
+            $query->whereNull('valid_upto')->orWhere('valid_upto', '>=', $today);
+        });
+
+    if ($uom) {
+        $query->orderByRaw('CASE WHEN uom = ? THEN 0 WHEN uom IS NULL THEN 1 ELSE 2 END', [$uom]);
+    }
+
+    $price = $query
+        ->orderByDesc('valid_from')
+        ->first();
+
+    return $price ? (float) $price->price_list_rate : null;
+};
 
 Route::get('/', fn () => Inertia::render('Landing', [
     'products' => $publicProducts(4),
@@ -158,7 +127,7 @@ Route::get('/promotions', fn () => Inertia::render('Landing', [
 ]))
     ->name('public.promotions');
 
-Route::get('/rewards', fn () => Inertia::render('PublicRewards', ['rewards' => $publicRewards()]))
+Route::get('/rewards', fn () => Inertia::render('PublicRewards', ['rewards' => []]))
     ->name('public.rewards');
 
 Route::redirect('/public-rewards', '/rewards');
@@ -176,6 +145,10 @@ Route::get('/contact', fn () => Inertia::render('Landing', [
     ->name('public.contact');
 
 Route::get('/login', fn () => Inertia::render('Auth/Login'))->name('login');
+Route::get('/forgot-password', [AuthController::class, 'forgotPassword'])->name('password.request');
+Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->name('password.email');
+Route::get('/reset-password/{token}', [AuthController::class, 'resetPassword'])->name('password.reset');
+Route::post('/reset-password', [AuthController::class, 'updatePassword'])->name('password.update');
 
 Route::middleware('guest')->group(function () {
     Route::post('/login', [AuthController::class, 'login'])->name('login.post');
@@ -183,7 +156,12 @@ Route::middleware('guest')->group(function () {
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-Route::prefix('buyer')->name('buyer.')->middleware('auth:customer')->group(function () use ($buyerRewards, $rewardHistory, $publicImageUrl) {
+Route::get('/admin/erp-settings/{record}/sync/{type}', ErpSettingSyncController::class)
+    ->middleware('auth')
+    ->where('type', 'items|item-groups|customer-types|customers|prices')
+    ->name('admin.erp-settings.sync');
+
+Route::prefix('buyer')->name('buyer.')->middleware('auth:customer')->group(function () use ($publicImageUrl, $erpItemPrice) {
     Route::get('/', function (Request $request) {
         $user = $request->user('customer');
 
@@ -205,8 +183,14 @@ Route::prefix('buyer')->name('buyer.')->middleware('auth:customer')->group(funct
         ]);
     })->name('dashboard');
 
-    Route::get('/catalog', function (Request $request) use ($publicImageUrl) {
-        $customerId = $request->user('customer')->customer_id;
+    Route::get('/catalog', function (Request $request) use ($publicImageUrl, $erpItemPrice) {
+        $account = $request->user('customer')->loadMissing('customer.customerType', 'customerType');
+        $customerId = $account->customer_id;
+        $priceList = $account->customer?->default_price_list
+            ?: $account->customer?->customerType?->default_price_list
+            ?: $account->customerType?->default_price_list
+            ?: ErpSetting::query()->value('default_selling_price_list');
+        $canViewPrice = (bool) $account->can_view_price;
         $customerRules = collect();
 
         if ($customerId) {
@@ -220,9 +204,11 @@ Route::prefix('buyer')->name('buyer.')->middleware('auth:customer')->group(funct
 
         if ($customerRules->isNotEmpty()) {
             $products = $customerRules
-                ->map(function (CustomerProductCatalog $rule) use ($publicImageUrl) {
+                ->map(function (CustomerProductCatalog $rule) use ($publicImageUrl, $erpItemPrice, $priceList, $canViewPrice) {
                     $catalog = $rule->productCatalog;
                     $item = $catalog->item;
+
+                    $price = $item && $canViewPrice ? $erpItemPrice($item->item_code, $item->stock_uom, $priceList) : null;
 
                     return [
                         'id' => $catalog->id,
@@ -230,7 +216,9 @@ Route::prefix('buyer')->name('buyer.')->middleware('auth:customer')->group(funct
                         'category' => $catalog->category?->name ?: $item?->item_group ?: 'Produk',
                         'grade' => $catalog->display_description ?: $item?->brand ?: 'Fresh',
                         'uom' => $item?->stock_uom ?: 'Unit',
-                        'price' => 0,
+                        'price' => $price,
+                        'price_list' => $priceList,
+                        'can_view_price' => $canViewPrice,
                         'stock' => (float) $rule->daily_quantity,
                         'stock_status' => ((float) $rule->daily_quantity) > 0 ? 'full' : 'empty',
                         'image' => $publicImageUrl($catalog->display_image_url ?: $item?->image_url),
@@ -262,36 +250,42 @@ Route::prefix('buyer')->name('buyer.')->middleware('auth:customer')->group(funct
             'categories' => $items
                 ->map(fn ($item) => $item->catalog->category?->name ?: $item->item_group)
                 ->filter()->unique()->prepend('Semua')->values(),
-            'products' => $items->map(fn ($item) => [
-                'id' => $item->id,
-                'name' => $item->catalog->display_name ?: $item->item_name,
-                'category' => $item->catalog->category?->name ?: $item->item_group ?: 'Produk',
-                'grade' => $item->catalog->display_description ?: $item->brand ?: 'Fresh',
-                'uom' => $item->stock_uom ?: 'Unit',
-                'price' => 0,
-                'stock' => 0,
-                'stock_status' => 'empty',
-                'image' => $publicImageUrl($item->catalog->display_image_url ?: $item->image_url),
-                'daily_quantity' => null,
-                'minimum_qty' => (float) $item->catalog->minimum_qty,
-                'maximum_qty' => $item->catalog->maximum_qty ? (float) $item->catalog->maximum_qty : null,
-                'allocation_note' => null,
-            ]),
+            'products' => $items->map(function ($item) use ($publicImageUrl, $erpItemPrice, $priceList, $canViewPrice) {
+                $price = $canViewPrice ? $erpItemPrice($item->item_code, $item->stock_uom, $priceList) : null;
+
+                return [
+                    'id' => $item->id,
+                    'name' => $item->catalog->display_name ?: $item->item_name,
+                    'category' => $item->catalog->category?->name ?: $item->item_group ?: 'Produk',
+                    'grade' => $item->catalog->display_description ?: $item->brand ?: 'Fresh',
+                    'uom' => $item->stock_uom ?: 'Unit',
+                    'price' => $price,
+                    'price_list' => $priceList,
+                    'can_view_price' => $canViewPrice,
+                    'stock' => 0,
+                    'stock_status' => 'empty',
+                    'image' => $publicImageUrl($item->catalog->display_image_url ?: $item->image_url),
+                    'daily_quantity' => null,
+                    'minimum_qty' => (float) $item->catalog->minimum_qty,
+                    'maximum_qty' => $item->catalog->maximum_qty ? (float) $item->catalog->maximum_qty : null,
+                    'allocation_note' => null,
+                ];
+            }),
             'uses_customer_rules' => false,
         ]);
     })->name('catalog');
 
-    Route::get('/cart', fn () => Inertia::render('Buyer/Cart'))->name('cart');
+    Route::get('/cart', fn () => Inertia::render('Buyer/Cart', ['items' => []]))->name('cart');
     Route::post('/cart/submit', fn () => redirect()->route('buyer.orders'))->name('cart.submit');
     Route::get('/orders', fn () => Inertia::render('Buyer/Orders', ['orders' => []]))->name('orders');
 
     Route::get('/rewards', fn () => Inertia::render('Buyer/Rewards', [
-        'points' => 900,
-        'tier' => 'Silver',
-        'next_tier' => 'Gold',
-        'next_points' => 1000,
-        'rewards' => $buyerRewards(),
-        'history' => $rewardHistory(),
+        'points' => 0,
+        'tier' => 'Bronze',
+        'next_tier' => 'Silver',
+        'next_points' => 500,
+        'rewards' => [],
+        'history' => [],
     ]))->name('rewards');
 
     Route::get('/settings', function (Request $request) {
@@ -309,4 +303,25 @@ Route::prefix('buyer')->name('buyer.')->middleware('auth:customer')->group(funct
             ],
         ]);
     })->name('settings');
+
+    Route::post('/settings', function (Request $request) {
+        $user = $request->user('customer');
+
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255', Rule::unique('customer_accounts', 'email')->ignore($user->id)],
+            'password' => ['nullable', 'confirmed', 'min:8'],
+        ]);
+
+        $user->name = $data['name'];
+        $user->email = $data['email'];
+
+        if (!empty($data['password'])) {
+            $user->password = Hash::make($data['password']);
+        }
+
+        $user->save();
+
+        return back()->with('status', 'Pengaturan akun berhasil diperbarui.');
+    })->name('settings.update');
 });
