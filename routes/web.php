@@ -1,12 +1,40 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Models\CustomerProductCatalog;
+use App\Models\ErpSetting;
 use App\Models\ErpItem;
+use App\Models\ProductCategory;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-$publicProducts = function (int $limit = 48) {
+$publicImageUrl = function (?string $path): ?string {
+    if (!$path) {
+        return null;
+    }
+
+    if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+        return $path;
+    }
+
+    $path = ltrim($path, '/');
+
+    if (str_starts_with($path, 'images/') || str_starts_with($path, 'storage/')) {
+        return '/' . $path;
+    }
+
+    if (str_starts_with($path, 'files/')) {
+        $baseUrl = rtrim((string) ErpSetting::query()->value('erp_site_url'), '/');
+
+        return $baseUrl ? $baseUrl . '/' . $path : '/' . $path;
+    }
+
+    return Storage::disk('public')->url($path);
+};
+
+$publicProducts = function (int $limit = 48) use ($publicImageUrl) {
     return ErpItem::query()
         ->with('catalog.category')
         ->where('disabled', false)
@@ -18,10 +46,28 @@ $publicProducts = function (int $limit = 48) {
             'name' => $item->catalog->display_name ?: $item->item_name,
             'category' => $item->catalog->category?->name ?: $item->item_group,
             'grade' => $item->catalog->display_description ?: $item->brand,
+            'packaging' => $item->catalog->display_description ?: $item->stock_uom,
             'uom' => $item->stock_uom,
             'price' => $item->catalog->show_price ? 'Masuk untuk melihat harga' : 'Hubungi kami',
             'stock_status' => 'Tersedia',
-            'image' => $item->catalog->display_image_url ?: $item->website_image_url ?: $item->image_url,
+            'image' => $publicImageUrl($item->catalog->display_image_url ?: $item->image_url),
+            'badge' => $item->catalog->is_featured ? 'Featured' : null,
+        ]);
+};
+
+$publicCategories = function () use ($publicImageUrl) {
+    return ProductCategory::query()
+        ->with(['catalogs' => fn ($query) => $query->where('is_visible', true)->orderByDesc('is_featured')])
+        ->withCount(['catalogs' => fn ($query) => $query->where('is_visible', true)])
+        ->where('is_active', true)
+        ->orderBy('display_order')
+        ->orderBy('name')
+        ->get()
+        ->map(fn (ProductCategory $category) => [
+            'id' => $category->id,
+            'name' => $category->name,
+            'count' => $category->catalogs_count . ' products',
+            'image' => $publicImageUrl($category->image_url ?: $category->catalogs->first()?->display_image_url),
         ]);
 };
 
@@ -93,14 +139,41 @@ $rewardHistory = fn () => [
     ['type' => 'redeem', 'description' => 'Contoh penukaran gratis ongkir', 'points' => -350, 'date' => '2026-07-08'],
 ];
 
-Route::get('/', fn () => Inertia::render('Landing', ['products' => $publicProducts(4)]))->name('landing');
+Route::get('/', fn () => Inertia::render('Landing', [
+    'products' => $publicProducts(4),
+    'categories' => $publicCategories(),
+]))->name('landing');
 
 Route::get('/products', function () use ($publicProducts) {
     return Inertia::render('PublicCatalog', ['products' => $publicProducts()]);
 })->name('public.products');
 
-Route::get('/public-rewards', fn () => Inertia::render('PublicRewards', ['rewards' => $publicRewards()]))
+Route::get('/categories', function () use ($publicProducts) {
+    return Inertia::render('PublicCatalog', ['products' => $publicProducts()]);
+})->name('public.categories');
+
+Route::get('/promotions', fn () => Inertia::render('Landing', [
+    'products' => $publicProducts(4),
+    'categories' => $publicCategories(),
+]))
+    ->name('public.promotions');
+
+Route::get('/rewards', fn () => Inertia::render('PublicRewards', ['rewards' => $publicRewards()]))
     ->name('public.rewards');
+
+Route::redirect('/public-rewards', '/rewards');
+
+Route::get('/about', fn () => Inertia::render('Landing', [
+    'products' => $publicProducts(4),
+    'categories' => $publicCategories(),
+]))
+    ->name('public.about');
+
+Route::get('/contact', fn () => Inertia::render('Landing', [
+    'products' => $publicProducts(4),
+    'categories' => $publicCategories(),
+]))
+    ->name('public.contact');
 
 Route::get('/login', fn () => Inertia::render('Auth/Login'))->name('login');
 
@@ -110,7 +183,7 @@ Route::middleware('guest')->group(function () {
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-Route::prefix('buyer')->name('buyer.')->middleware('auth')->group(function () use ($buyerRewards, $rewardHistory) {
+Route::prefix('buyer')->name('buyer.')->middleware('auth')->group(function () use ($buyerRewards, $rewardHistory, $publicImageUrl) {
     Route::get('/', function (Request $request) {
         $user = $request->user();
 
@@ -132,7 +205,52 @@ Route::prefix('buyer')->name('buyer.')->middleware('auth')->group(function () us
         ]);
     })->name('dashboard');
 
-    Route::get('/catalog', function () {
+    Route::get('/catalog', function (Request $request) use ($publicImageUrl) {
+        $customerId = $request->user()->customer_id;
+        $customerRules = collect();
+
+        if ($customerId) {
+            $customerRules = CustomerProductCatalog::query()
+                ->with('productCatalog.item', 'productCatalog.category')
+                ->where('customer_id', $customerId)
+                ->where('is_active', true)
+                ->whereHas('productCatalog', fn ($query) => $query->where('is_visible', true))
+                ->get();
+        }
+
+        if ($customerRules->isNotEmpty()) {
+            $products = $customerRules
+                ->map(function (CustomerProductCatalog $rule) use ($publicImageUrl) {
+                    $catalog = $rule->productCatalog;
+                    $item = $catalog->item;
+
+                    return [
+                        'id' => $catalog->id,
+                        'name' => $catalog->display_name ?: $catalog->item_name,
+                        'category' => $catalog->category?->name ?: $item?->item_group ?: 'Produk',
+                        'grade' => $catalog->display_description ?: $item?->brand ?: 'Fresh',
+                        'uom' => $item?->stock_uom ?: 'Unit',
+                        'price' => 0,
+                        'stock' => (float) $rule->daily_quantity,
+                        'stock_status' => ((float) $rule->daily_quantity) > 0 ? 'full' : 'empty',
+                        'image' => $publicImageUrl($catalog->display_image_url ?: $item?->image_url),
+                        'daily_quantity' => (float) $rule->daily_quantity,
+                        'minimum_qty' => (float) ($rule->minimum_qty ?: $catalog->minimum_qty),
+                        'maximum_qty' => (float) ($rule->maximum_qty ?: $rule->daily_quantity ?: $catalog->maximum_qty),
+                        'allocation_note' => $rule->note,
+                    ];
+                })
+                ->values();
+
+            return Inertia::render('Buyer/Catalog', [
+                'categories' => $products
+                    ->pluck('category')
+                    ->filter()->unique()->prepend('Semua')->values(),
+                'products' => $products,
+                'uses_customer_rules' => true,
+            ]);
+        }
+
         $items = ErpItem::query()
             ->with('catalog.category')
             ->where('disabled', false)
@@ -147,14 +265,19 @@ Route::prefix('buyer')->name('buyer.')->middleware('auth')->group(function () us
             'products' => $items->map(fn ($item) => [
                 'id' => $item->id,
                 'name' => $item->catalog->display_name ?: $item->item_name,
-                'category' => $item->catalog->category?->name ?: $item->item_group,
-                'grade' => $item->catalog->display_description ?: $item->brand,
-                'uom' => $item->stock_uom,
+                'category' => $item->catalog->category?->name ?: $item->item_group ?: 'Produk',
+                'grade' => $item->catalog->display_description ?: $item->brand ?: 'Fresh',
+                'uom' => $item->stock_uom ?: 'Unit',
                 'price' => 0,
                 'stock' => 0,
                 'stock_status' => 'empty',
-                'image' => $item->catalog->display_image_url ?: $item->website_image_url ?: $item->image_url,
+                'image' => $publicImageUrl($item->catalog->display_image_url ?: $item->image_url),
+                'daily_quantity' => null,
+                'minimum_qty' => (float) $item->catalog->minimum_qty,
+                'maximum_qty' => $item->catalog->maximum_qty ? (float) $item->catalog->maximum_qty : null,
+                'allocation_note' => null,
             ]),
+            'uses_customer_rules' => false,
         ]);
     })->name('catalog');
 

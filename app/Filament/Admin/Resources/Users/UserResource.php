@@ -18,11 +18,17 @@ class UserResource extends Resource
 {
     protected static ?string $model = User::class;
 
-    protected static ?string $navigationLabel = 'Buyer Users';
+    protected static ?string $navigationLabel = 'Customer Accounts';
     
-    protected static ?string $modelLabel = 'Buyer User';
+    protected static ?string $modelLabel = 'Customer Account';
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static ?string $pluralModelLabel = 'Customer Accounts';
+
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUsers;
+
+    protected static \UnitEnum|string|null $navigationGroup = 'Customers';
+
+    protected static ?int $navigationSort = 30;
 
     public static function form(Schema $schema): Schema
     {

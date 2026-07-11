@@ -53,6 +53,42 @@ class EditErpSetting extends EditRecord
                         $this->notifyFailure('Item synchronization failed', $exception);
                     }
                 }),
+            Action::make('syncProductCategories')
+                ->label('Sync Item Groups')
+                ->icon('heroicon-o-tag')
+                ->color('primary')
+                ->requiresConfirmation()
+                ->modalDescription('Fetch Item Group records from ERPNext and generate product categories?')
+                ->action(function (): void {
+                    try {
+                        app(ItemService::class)->syncProductCategories();
+
+                        Notification::make()
+                            ->title('Item group synchronization completed')
+                            ->success()
+                            ->send();
+                    } catch (Throwable $exception) {
+                        $this->notifyFailure('Item group synchronization failed', $exception);
+                    }
+                }),
+            Action::make('syncCustomerTypes')
+                ->label('Sync Customer Types')
+                ->icon('heroicon-o-identification')
+                ->color('primary')
+                ->requiresConfirmation()
+                ->modalDescription('Seed the approved customer types and match ERPNext Customer Groups when available?')
+                ->action(function (): void {
+                    try {
+                        app(CustomerService::class)->syncCustomerTypes();
+
+                        Notification::make()
+                            ->title('Customer type synchronization completed')
+                            ->success()
+                            ->send();
+                    } catch (Throwable $exception) {
+                        $this->notifyFailure('Customer type synchronization failed', $exception);
+                    }
+                }),
             Action::make('syncCustomers')
                 ->label('Sync Customers')
                 ->color('primary')

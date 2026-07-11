@@ -3,8 +3,12 @@
 namespace App\Filament\Admin\Resources\CustomerTypes\Pages;
 
 use App\Filament\Admin\Resources\CustomerTypes\CustomerTypeResource;
+use App\Services\ERP\CustomerService;
+use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
+use Throwable;
 
 class ListCustomerTypes extends ListRecords
 {
@@ -13,6 +17,29 @@ class ListCustomerTypes extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('syncCustomerTypes')
+                ->label('Sync Customer Types')
+                ->icon('heroicon-o-arrow-path')
+                ->color('primary')
+                ->action(function (): void {
+                    try {
+                        app(CustomerService::class)->syncCustomerTypes();
+
+                        Notification::make()
+                            ->title('Customer types synchronized')
+                            ->success()
+                            ->send();
+                    } catch (Throwable $exception) {
+                        report($exception);
+
+                        Notification::make()
+                            ->title('Customer type synchronization failed')
+                            ->body($exception->getMessage())
+                            ->danger()
+                            ->persistent()
+                            ->send();
+                    }
+                }),
             CreateAction::make(),
         ];
     }

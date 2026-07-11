@@ -1,34 +1,20 @@
 <script setup>
-import { computed, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { Link } from '@inertiajs/vue3';
+import { ChevronDown, Heart, Minus, PackageSearch, Plus, Search, ShoppingCart, SlidersHorizontal } from 'lucide-vue-next';
 import PublicLayout from '@/Layouts/PublicLayout.vue';
 
 const props = defineProps({
     products: { type: Array, default: () => [] },
 });
 
-const sampleProducts = [
-    { id: 'catalog-1', name: 'Cavendish Banana Premium', category: 'Banana', grade: 'Premium Grade', packaging: '12 kg per box', uom: 'Box', price: 'Rp75.000', original_price: 'Rp88.000', stock_status: 'In Stock', image: '/images/banana_organic.png', badge: 'Best Seller' },
-    { id: 'catalog-2', name: 'Cavendish Banana Chibi', category: 'Banana', grade: 'Fresh Selection', packaging: '5 kg pack', uom: 'Pack', price: 'Rp42.000', original_price: '', stock_status: 'In Stock', image: '/images/banana_organic.png', badge: 'Featured' },
-    { id: 'catalog-3', name: 'Barangan Banana Grade A', category: 'Banana', grade: 'Grade A', packaging: 'Minimum order 1 box', uom: 'Box', price: 'Rp82.000', original_price: '', stock_status: 'Low Stock', image: '/images/hero_fruits.png', badge: 'Popular' },
-    { id: 'catalog-4', name: 'Papaya Red Lady', category: 'Papaya', grade: 'Fresh Selection', packaging: '12 pcs per crate', uom: 'Crate', price: 'Rp96.000', original_price: '', stock_status: 'In Stock', image: '/images/honey_mango.png', badge: 'New' },
-    { id: 'catalog-5', name: 'Sweet Pineapple', category: 'Pineapple', grade: 'Premium Grade', packaging: '10 pcs per crate', uom: 'Crate', price: 'Rp125.000', original_price: 'Rp140.000', stock_status: 'In Stock', image: '/images/apple_fuji.png', badge: 'Special Offer' },
-    { id: 'catalog-6', name: 'Premium Mangosteen', category: 'Mangosteen', grade: 'Grade A', packaging: '5 kg pack', uom: 'Pack', price: 'Rp118.000', original_price: '', stock_status: 'Low Stock', image: '/images/dragon_fruit.png', badge: 'Limited Stock' },
-    { id: 'catalog-7', name: 'Seedless Watermelon', category: 'Watermelon', grade: 'Fresh Selection', packaging: 'Per piece', uom: 'Pcs', price: 'Rp38.500', original_price: '', stock_status: 'In Stock', image: '/images/hero_fruits.png', badge: 'Featured' },
-    { id: 'catalog-8', name: 'Passion Fruit', category: 'Passion Fruit', grade: 'Premium Grade', packaging: '1 kg pack', uom: 'Kg', price: 'Rp47.000', original_price: '', stock_status: 'Out of Stock', image: '/images/dragon_fruit.png', badge: 'Notify Me' },
-];
-
 const normalizedProducts = computed(() => {
-    const source = props.products.length ? props.products : sampleProducts;
-
-    return source.map((product, index) => ({
-        ...sampleProducts[index % sampleProducts.length],
+    return props.products.map((product) => ({
         ...product,
-        image: product.image || sampleProducts[index % sampleProducts.length].image,
-        price: product.price || sampleProducts[index % sampleProducts.length].price,
-        packaging: product.packaging || product.grade || sampleProducts[index % sampleProducts.length].packaging,
-        stock_status: product.stock_status || sampleProducts[index % sampleProducts.length].stock_status,
-        badge: product.badge || sampleProducts[index % sampleProducts.length].badge,
+        price: product.price || 'Hubungi kami',
+        packaging: product.packaging || product.grade || product.uom || 'Fresh product',
+        stock_status: product.stock_status || 'Tersedia',
+        badge: product.badge || null,
     }));
 });
 
@@ -36,16 +22,83 @@ const categories = computed(() => ['All', ...new Set(normalizedProducts.value.ma
 const activeCategory = ref('All');
 const search = ref('');
 const sort = ref('Recommended');
+const selectedGrade = ref('All');
+const selectedPackaging = ref('All');
+const selectedAvailability = ref('All');
+const selectedPromotion = ref('All');
+const likedProductIds = ref([]);
+
+const uniqueOptions = (field) => computed(() => [
+    'All',
+    ...new Set(normalizedProducts.value.map(product => product[field]).filter(Boolean)),
+]);
+
+const gradeOptions = uniqueOptions('grade');
+const packagingOptions = uniqueOptions('uom');
+const availabilityOptions = uniqueOptions('stock_status');
+const promotionOptions = computed(() => [
+    'All',
+    'With offer',
+    ...new Set(normalizedProducts.value.map(product => product.badge).filter(Boolean)),
+]);
+const selectedGradeLabel = computed(() => `Grade: ${selectedGrade.value}`);
+const selectedPackagingLabel = computed(() => `Packaging: ${selectedPackaging.value}`);
+const selectedAvailabilityLabel = computed(() => `Availability: ${selectedAvailability.value}`);
+const selectedPromotionLabel = computed(() => `Promotion: ${selectedPromotion.value}`);
+
+const hasActiveFilters = computed(() => {
+    return Boolean(search.value)
+        || activeCategory.value !== 'All'
+        || selectedGrade.value !== 'All'
+        || selectedPackaging.value !== 'All'
+        || selectedAvailability.value !== 'All'
+        || selectedPromotion.value !== 'All';
+});
+
+const resetFilters = () => {
+    search.value = '';
+    activeCategory.value = 'All';
+    selectedGrade.value = 'All';
+    selectedPackaging.value = 'All';
+    selectedAvailability.value = 'All';
+    selectedPromotion.value = 'All';
+};
+
+const isLiked = (productId) => likedProductIds.value.includes(productId);
+
+const toggleLike = (productId) => {
+    likedProductIds.value = isLiked(productId)
+        ? likedProductIds.value.filter(id => id !== productId)
+        : [...likedProductIds.value, productId];
+};
+
+onMounted(() => {
+    try {
+        likedProductIds.value = JSON.parse(localStorage.getItem('willshine-liked-products') || '[]');
+    } catch {
+        likedProductIds.value = [];
+    }
+});
+
+watch(likedProductIds, (ids) => {
+    localStorage.setItem('willshine-liked-products', JSON.stringify(ids));
+}, { deep: true });
 
 const filteredProducts = computed(() => {
     const keyword = search.value.trim().toLowerCase();
     let list = normalizedProducts.value.filter((product) => {
         const matchesCategory = activeCategory.value === 'All' || product.category === activeCategory.value;
+        const matchesGrade = selectedGrade.value === 'All' || product.grade === selectedGrade.value;
+        const matchesPackaging = selectedPackaging.value === 'All' || product.uom === selectedPackaging.value;
+        const matchesAvailability = selectedAvailability.value === 'All' || product.stock_status === selectedAvailability.value;
+        const matchesPromotion = selectedPromotion.value === 'All'
+            || (selectedPromotion.value === 'With offer' && product.badge)
+            || product.badge === selectedPromotion.value;
         const matchesSearch = !keyword || [product.name, product.category, product.grade, product.packaging, product.uom]
             .filter(Boolean)
             .some(value => String(value).toLowerCase().includes(keyword));
 
-        return matchesCategory && matchesSearch;
+        return matchesCategory && matchesGrade && matchesPackaging && matchesAvailability && matchesPromotion && matchesSearch;
     });
 
     if (sort.value === 'Name A-Z') {
@@ -75,13 +128,11 @@ const filteredProducts = computed(() => {
         </section>
 
         <section class="public-container -mt-6 pb-16">
-            <div class="rounded-[1.6rem] border border-[#E5E7EB] bg-white p-4 shadow-[0_18px_50px_rgba(17,24,39,.08)]">
+            <div class="rounded-[1.6rem] border border-[#FBCFE8] bg-white p-4 shadow-[0_18px_50px_rgba(236,72,153,.12)]">
                 <div class="grid gap-4 lg:grid-cols-[1fr_220px]">
                     <label class="relative block">
                         <span class="sr-only">Search products</span>
-                        <svg class="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#9CA3AF]" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.2-5.2m1.7-4.8a6.5 6.5 0 11-13 0 6.5 6.5 0 0113 0z" />
-                        </svg>
+                        <Search class="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#EC4899]" />
                         <input
                             v-model="search"
                             type="search"
@@ -89,9 +140,10 @@ const filteredProducts = computed(() => {
                             class="h-12 w-full rounded-2xl border border-[#E5E7EB] bg-white pl-12 pr-4 text-sm font-medium text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#EC4899] focus:ring-4 focus:ring-[#FCE7F3]"
                         />
                     </label>
-                    <label>
+                    <label class="relative flex h-12 cursor-pointer items-center rounded-2xl border border-[#E5E7EB] bg-white px-4 pr-11 text-sm font-bold text-[#374151] transition hover:border-[#FBCFE8] hover:bg-[#FDF2F8] focus-within:border-[#EC4899] focus-within:ring-4 focus-within:ring-[#FCE7F3]">
                         <span class="sr-only">Sort products</span>
-                        <select v-model="sort" class="h-12 w-full rounded-2xl border border-[#E5E7EB] bg-white px-4 text-sm font-bold text-[#374151] outline-none focus:border-[#EC4899] focus:ring-4 focus:ring-[#FCE7F3]">
+                        <span class="truncate">{{ sort }}</span>
+                        <select v-model="sort" class="absolute inset-0 z-10 h-full w-full cursor-pointer appearance-none opacity-0">
                             <option>Recommended</option>
                             <option>Newest</option>
                             <option>Name A-Z</option>
@@ -100,6 +152,7 @@ const filteredProducts = computed(() => {
                             <option>Price High to Low</option>
                             <option>Most Popular</option>
                         </select>
+                        <ChevronDown class="pointer-events-none absolute right-4 top-1/2 z-20 h-4 w-4 -translate-y-1/2 text-[#374151]" />
                     </label>
                 </div>
 
@@ -121,16 +174,48 @@ const filteredProducts = computed(() => {
                 </div>
 
                 <div class="mt-4 grid gap-3 text-sm font-semibold text-[#6B7280] md:grid-cols-4">
-                    <button type="button" class="rounded-2xl border border-[#E5E7EB] px-4 py-3 text-left hover:bg-[#F9FAFB]">Grade: All</button>
-                    <button type="button" class="rounded-2xl border border-[#E5E7EB] px-4 py-3 text-left hover:bg-[#F9FAFB]">Packaging: Box, Kg, Pack</button>
-                    <button type="button" class="rounded-2xl border border-[#E5E7EB] px-4 py-3 text-left hover:bg-[#F9FAFB]">Availability: In stock</button>
-                    <button type="button" class="rounded-2xl border border-[#E5E7EB] px-4 py-3 text-left hover:bg-[#F9FAFB]">Promotion: Active offers</button>
+                    <label class="group relative flex min-h-14 cursor-pointer items-center gap-2 rounded-2xl border border-[#FBCFE8] px-4 py-3 pr-11 text-left transition hover:-translate-y-0.5 hover:bg-[#FDF2F8] hover:shadow-[0_12px_28px_rgba(236,72,153,.12)] focus-within:ring-4 focus-within:ring-[#FCE7F3]">
+                        <SlidersHorizontal class="pointer-events-none h-4 w-4 shrink-0 text-[#EC4899]" />
+                        <span class="pointer-events-none min-w-0 flex-1 truncate text-sm font-bold text-[#374151]">{{ selectedGradeLabel }}</span>
+                        <span class="sr-only">Filter grade</span>
+                        <select v-model="selectedGrade" class="absolute inset-0 z-10 h-full w-full cursor-pointer appearance-none opacity-0">
+                            <option v-for="option in gradeOptions" :key="option" :value="option">Grade: {{ option }}</option>
+                        </select>
+                        <ChevronDown class="pointer-events-none absolute right-4 top-1/2 z-20 h-4 w-4 -translate-y-1/2 text-[#BE185D]" />
+                    </label>
+                    <label class="group relative flex min-h-14 cursor-pointer items-center gap-2 rounded-2xl border border-[#FBCFE8] px-4 py-3 pr-11 text-left transition hover:-translate-y-0.5 hover:bg-[#FDF2F8] hover:shadow-[0_12px_28px_rgba(236,72,153,.12)] focus-within:ring-4 focus-within:ring-[#FCE7F3]">
+                        <SlidersHorizontal class="pointer-events-none h-4 w-4 shrink-0 text-[#EC4899]" />
+                        <span class="pointer-events-none min-w-0 flex-1 truncate text-sm font-bold text-[#374151]">{{ selectedPackagingLabel }}</span>
+                        <span class="sr-only">Filter packaging</span>
+                        <select v-model="selectedPackaging" class="absolute inset-0 z-10 h-full w-full cursor-pointer appearance-none opacity-0">
+                            <option v-for="option in packagingOptions" :key="option" :value="option">Packaging: {{ option }}</option>
+                        </select>
+                        <ChevronDown class="pointer-events-none absolute right-4 top-1/2 z-20 h-4 w-4 -translate-y-1/2 text-[#BE185D]" />
+                    </label>
+                    <label class="group relative flex min-h-14 cursor-pointer items-center gap-2 rounded-2xl border border-[#FBCFE8] px-4 py-3 pr-11 text-left transition hover:-translate-y-0.5 hover:bg-[#FDF2F8] hover:shadow-[0_12px_28px_rgba(236,72,153,.12)] focus-within:ring-4 focus-within:ring-[#FCE7F3]">
+                        <SlidersHorizontal class="pointer-events-none h-4 w-4 shrink-0 text-[#EC4899]" />
+                        <span class="pointer-events-none min-w-0 flex-1 truncate text-sm font-bold text-[#374151]">{{ selectedAvailabilityLabel }}</span>
+                        <span class="sr-only">Filter availability</span>
+                        <select v-model="selectedAvailability" class="absolute inset-0 z-10 h-full w-full cursor-pointer appearance-none opacity-0">
+                            <option v-for="option in availabilityOptions" :key="option" :value="option">Availability: {{ option }}</option>
+                        </select>
+                        <ChevronDown class="pointer-events-none absolute right-4 top-1/2 z-20 h-4 w-4 -translate-y-1/2 text-[#BE185D]" />
+                    </label>
+                    <label class="group relative flex min-h-14 cursor-pointer items-center gap-2 rounded-2xl border border-[#FBCFE8] px-4 py-3 pr-11 text-left transition hover:-translate-y-0.5 hover:bg-[#FDF2F8] hover:shadow-[0_12px_28px_rgba(236,72,153,.12)] focus-within:ring-4 focus-within:ring-[#FCE7F3]">
+                        <SlidersHorizontal class="pointer-events-none h-4 w-4 shrink-0 text-[#EC4899]" />
+                        <span class="pointer-events-none min-w-0 flex-1 truncate text-sm font-bold text-[#374151]">{{ selectedPromotionLabel }}</span>
+                        <span class="sr-only">Filter promotion</span>
+                        <select v-model="selectedPromotion" class="absolute inset-0 z-10 h-full w-full cursor-pointer appearance-none opacity-0">
+                            <option v-for="option in promotionOptions" :key="option" :value="option">Promotion: {{ option }}</option>
+                        </select>
+                        <ChevronDown class="pointer-events-none absolute right-4 top-1/2 z-20 h-4 w-4 -translate-y-1/2 text-[#BE185D]" />
+                    </label>
                 </div>
             </div>
 
             <div class="mt-8 flex items-center justify-between">
                 <p class="text-sm font-semibold text-[#6B7280]">{{ filteredProducts.length }} products found</p>
-                <button v-if="search || activeCategory !== 'All'" type="button" class="text-sm font-bold text-[#BE185D]" @click="search = ''; activeCategory = 'All'">
+                <button v-if="hasActiveFilters" type="button" class="text-sm font-bold text-[#BE185D]" @click="resetFilters">
                     Reset Filters
                 </button>
             </div>
@@ -139,20 +224,30 @@ const filteredProducts = computed(() => {
                 <article
                     v-for="product in filteredProducts"
                     :key="product.id"
-                    class="group flex flex-col overflow-hidden rounded-[1.4rem] border border-[#E5E7EB] bg-white p-3 shadow-sm transition-all hover:-translate-y-1 hover:border-[#FBCFE8] hover:shadow-xl hover:shadow-pink-900/10"
+                    class="group flex flex-col overflow-hidden rounded-[1.4rem] border border-[#FBCFE8] bg-white p-3 shadow-sm transition-all hover:-translate-y-1 hover:border-[#F9A8D4] hover:shadow-[0_24px_50px_rgba(236,72,153,.16)]"
                     :class="{ 'opacity-70': product.stock_status === 'Out of Stock' }"
                 >
                     <div class="relative h-56 overflow-hidden rounded-[1rem] bg-[#FDF2F8]">
-                        <img :src="product.image" :alt="product.name" class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                        <span class="absolute left-3 top-3 rounded-full bg-[#EC4899] px-3 py-1 text-xs font-bold text-white">{{ product.badge }}</span>
+                        <img v-if="product.image" :src="product.image" :alt="product.name" class="h-full w-full object-cover saturate-[1.05] transition-transform duration-500 group-hover:scale-105" />
+                        <div v-else class="flex h-full w-full items-center justify-center text-[#BE185D]">
+                            <PackageSearch class="h-14 w-14" />
+                        </div>
+                        <div class="pointer-events-none absolute inset-0 bg-[#EC4899]/10 mix-blend-soft-light"></div>
+                        <span v-if="product.badge" class="pointer-events-none absolute left-3 top-3 rounded-full bg-[#EC4899] px-3 py-1 text-xs font-bold text-white">{{ product.badge }}</span>
                         <span
-                            class="absolute bottom-3 left-3 rounded-full px-3 py-1 text-xs font-bold"
+                            class="pointer-events-none absolute bottom-3 left-3 rounded-full px-3 py-1 text-xs font-bold"
                             :class="product.stock_status === 'Out of Stock' ? 'bg-[#FEE2E2] text-[#991B1B]' : product.stock_status === 'Low Stock' ? 'bg-[#FEF3C7] text-[#92400E]' : 'bg-[#DCFCE7] text-[#166534]'"
                         >
                             {{ product.stock_status }}
                         </span>
-                        <button class="absolute right-3 top-3 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-[#BE185D]" aria-label="Add to wishlist">
-                            <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 7.2a5 5 0 00-8.8-3.2A5 5 0 003.2 7.2C3.2 13 12 19 12 19s8.8-6 8.8-11.8z" /></svg>
+                        <button
+                            type="button"
+                            class="absolute right-3 top-3 z-30 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-[#BE185D] shadow-sm transition hover:-translate-y-0.5 hover:bg-[#FCE7F3] hover:shadow-[0_12px_24px_rgba(236,72,153,.16)]"
+                            :class="isLiked(product.id) ? 'bg-[#EC4899] text-white' : ''"
+                            :aria-label="isLiked(product.id) ? 'Remove from wishlist' : 'Add to wishlist'"
+                            @click.stop.prevent="toggleLike(product.id)"
+                        >
+                            <Heart class="h-5 w-5" :fill="isLiked(product.id) ? 'currentColor' : 'none'" />
                         </button>
                     </div>
 
@@ -168,15 +263,16 @@ const filteredProducts = computed(() => {
 
                         <div class="mt-5 grid grid-cols-[112px_1fr] gap-2">
                             <div class="flex min-h-11 items-center justify-between rounded-xl border border-[#E5E7EB] px-3 text-sm font-bold text-[#374151]">
-                                <button type="button" aria-label="Decrease quantity">-</button>
+                                <button type="button" aria-label="Decrease quantity"><Minus class="h-4 w-4" /></button>
                                 <span>1</span>
-                                <button type="button" aria-label="Increase quantity">+</button>
+                                <button type="button" aria-label="Increase quantity"><Plus class="h-4 w-4" /></button>
                             </div>
                             <Link
                                 href="/login"
-                                class="inline-flex min-h-11 items-center justify-center rounded-xl text-sm font-bold transition"
+                                class="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl text-sm font-bold transition"
                                 :class="product.stock_status === 'Out of Stock' ? 'bg-[#F3F4F6] text-[#6B7280]' : 'bg-[#EC4899] text-white hover:bg-[#BE185D]'"
                             >
+                                <ShoppingCart v-if="product.stock_status !== 'Out of Stock'" class="h-4 w-4" />
                                 {{ product.stock_status === 'Out of Stock' ? 'Notify Me' : 'Add to Cart' }}
                             </Link>
                         </div>
@@ -187,11 +283,11 @@ const filteredProducts = computed(() => {
 
             <div v-if="filteredProducts.length === 0" class="mt-10 rounded-[1.6rem] border border-[#E5E7EB] bg-white px-6 py-16 text-center shadow-sm">
                 <div class="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-[#FCE7F3] text-[#BE185D]">
-                    <svg class="h-8 w-8" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.2-5.2m1.7-4.8a6.5 6.5 0 11-13 0 6.5 6.5 0 0113 0z" /></svg>
+                    <Search class="h-8 w-8" />
                 </div>
                 <h3 class="text-xl font-black text-[#111827]">No products found</h3>
                 <p class="mt-2 text-[#6B7280]">Try adjusting your search or filter selection.</p>
-                <button type="button" class="mt-6 rounded-xl bg-[#EC4899] px-6 py-3 text-sm font-bold text-white" @click="search = ''; activeCategory = 'All'">
+                <button type="button" class="mt-6 rounded-xl bg-[#EC4899] px-6 py-3 text-sm font-bold text-white" @click="resetFilters">
                     Reset Filters
                 </button>
             </div>

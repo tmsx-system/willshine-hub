@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue';
 import { Link, useForm } from '@inertiajs/vue3';
+import { Eye, LoaderCircle, LockKeyhole, Mail } from 'lucide-vue-next';
 
 const form = useForm({
     email: '',
@@ -77,9 +78,7 @@ function submit() {
                         <div>
                             <label for="email" class="mb-2 block text-sm font-bold text-[#374151]">Email</label>
                             <div class="relative">
-                                <svg class="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#9CA3AF]" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 7l9 6 9-6M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                                </svg>
+                                <Mail class="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#EC4899]" />
                                 <input
                                     id="email"
                                     v-model="form.email"
@@ -99,9 +98,7 @@ function submit() {
                                 <a href="mailto:support@tmsx.co.id" class="text-xs font-bold text-[#BE185D] hover:underline">Forgot password?</a>
                             </div>
                             <div class="relative">
-                                <svg class="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#9CA3AF]" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M7 10V8a5 5 0 0110 0v2m-11 0h12a2 2 0 012 2v7H4v-7a2 2 0 012-2z" />
-                                </svg>
+                                <LockKeyhole class="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#EC4899]" />
                                 <input
                                     id="password"
                                     v-model="form.password"
@@ -118,10 +115,7 @@ function submit() {
                                     :aria-label="showPassword ? 'Hide password' : 'Show password'"
                                     @click="showPassword = !showPassword"
                                 >
-                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6z" />
-                                        <circle cx="12" cy="12" r="2.5" />
-                                    </svg>
+                                    <Eye class="h-5 w-5" />
                                 </button>
                             </div>
                         </div>
@@ -136,10 +130,7 @@ function submit() {
                             :disabled="form.processing"
                             class="flex h-14 w-full items-center justify-center rounded-2xl bg-[#EC4899] px-6 font-bold text-white shadow-lg shadow-pink-900/15 transition hover:-translate-y-0.5 hover:bg-[#BE185D] disabled:cursor-not-allowed disabled:opacity-60"
                         >
-                            <svg v-if="form.processing" class="mr-2 h-5 w-5 animate-spin" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0A12 12 0 000 12h4z" />
-                            </svg>
+                            <LoaderCircle v-if="form.processing" class="mr-2 h-5 w-5 animate-spin" />
                             {{ form.processing ? 'Verifying...' : 'Login' }}
                         </button>
                     </form>

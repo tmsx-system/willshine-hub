@@ -4,8 +4,10 @@ namespace App\Services\ERP;
 
 use App\Models\ErpItem;
 use App\Models\ProductCatalog;
+use App\Models\ProductCategory;
 use Exception;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class ItemService
 {
@@ -19,6 +21,8 @@ class ItemService
     public function syncItems()
     {
         try {
+            $this->syncProductCategories();
+
             $limit = 100;
             $start = 0;
             $hasMore = true;
@@ -38,17 +42,7 @@ class ItemService
                 }
 
                 foreach ($items as $data) {
-                    $websiteImageUrl = null;
-                    if (!empty($data['website_image'])) {
-                        $baseUrl = rtrim($this->client->getSetting()->erp_site_url, '/');
-                        $websiteImageUrl = str_starts_with($data['website_image'], 'http') ? $data['website_image'] : $baseUrl . $data['website_image'];
-                    }
-                    
-                    $imageUrl = null;
-                    if (!empty($data['image'])) {
-                        $baseUrl = rtrim($this->client->getSetting()->erp_site_url, '/');
-                        $imageUrl = str_starts_with($data['image'], 'http') ? $data['image'] : $baseUrl . $data['image'];
-                    }
+                    $imageUrl = $this->absoluteFileUrl($data['image'] ?? null);
 
                     $item = ErpItem::updateOrCreate(
                         ['erp_item_id' => $data['name']],
@@ -60,7 +54,6 @@ class ItemService
                             'description' => $data['description'] ?? null,
                             'brand' => $data['brand'] ?? null,
                             'image_url' => $imageUrl,
-                            'website_image_url' => $websiteImageUrl,
                             'is_stock_item' => $data['is_stock_item'] ?? true,
                             'disabled' => $data['disabled'] ?? false,
                             'has_batch_no' => $data['has_batch_no'] ?? false,
@@ -70,14 +63,17 @@ class ItemService
                         ]
                     );
 
-                    ProductCatalog::firstOrCreate(
+                    $category = $this->resolveCategory($item->item_group);
+
+                    $catalog = ProductCatalog::firstOrCreate(
                         ['item_id' => $item->id],
                         [
                             'item_code' => $item->item_code,
                             'item_name' => $item->item_name,
+                            'category_id' => $category?->id,
                             'display_name' => $item->item_name,
                             'display_description' => $item->description,
-                            'display_image_url' => $item->website_image_url ?: $item->image_url,
+                            'display_image_url' => $item->image_url,
                             'is_visible' => false,
                             'is_featured' => false,
                             'display_order' => 0,
@@ -86,6 +82,16 @@ class ItemService
                             'show_price' => true,
                         ],
                     );
+
+                    $catalog->fill([
+                        'item_code' => $item->item_code,
+                        'item_name' => $item->item_name,
+                        'category_id' => $catalog->category_id ?: $category?->id,
+                    ])->save();
+
+                    if (!$catalog->display_image_url && $item->image_url) {
+                        $catalog->forceFill(['display_image_url' => $item->image_url])->save();
+                    }
                 }
 
                 $start += $limit;
@@ -105,5 +111,71 @@ class ItemService
             Log::error("Failed to sync items: " . $e->getMessage());
             throw $e;
         }
+    }
+
+    public function syncProductCategories(): bool
+    {
+        try {
+            $groups = $this->client->get('Item Group', [
+                'fields' => '["name", "item_group_name", "parent_item_group", "is_group", "modified"]',
+                'limit_page_length' => 500,
+            ]);
+
+            foreach ($groups as $index => $group) {
+                $name = $group['item_group_name'] ?? $group['name'] ?? null;
+
+                if (!$name || in_array($name, ['All Item Groups', 'Products'], true)) {
+                    continue;
+                }
+
+                ProductCategory::updateOrCreate(
+                    ['slug' => Str::slug($name)],
+                    [
+                        'name' => $name,
+                        'description' => 'Synced from ERPNext Item Group.',
+                        'display_order' => $index + 1,
+                        'is_active' => true,
+                    ],
+                );
+            }
+
+            return true;
+        } catch (Exception $e) {
+            Log::warning('Product category sync skipped because ERPNext Item Group could not be fetched: ' . $e->getMessage());
+
+            return true;
+        }
+    }
+
+    private function resolveCategory(?string $itemGroup): ?ProductCategory
+    {
+        if (!$itemGroup) {
+            return null;
+        }
+
+        return ProductCategory::firstOrCreate(
+            ['slug' => Str::slug($itemGroup)],
+            [
+                'name' => $itemGroup,
+                'description' => 'Generated from ERPNext Item Group.',
+                'display_order' => 0,
+                'is_active' => true,
+            ],
+        );
+    }
+
+    private function absoluteFileUrl(?string $path): ?string
+    {
+        if (!$path) {
+            return null;
+        }
+
+        if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+            return $path;
+        }
+
+        $baseUrl = rtrim($this->client->getSetting()->erp_site_url, '/');
+
+        return $baseUrl . '/' . ltrim($path, '/');
     }
 }

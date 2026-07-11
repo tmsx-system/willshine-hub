@@ -18,7 +18,17 @@ class CustomerTypeResource extends Resource
 {
     protected static ?string $model = CustomerType::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedIdentification;
+
+    protected static \UnitEnum|string|null $navigationGroup = 'Customers';
+
+    protected static ?int $navigationSort = 10;
+
+    protected static ?string $navigationLabel = 'Customer Types';
+
+    protected static ?string $modelLabel = 'Customer Type';
+
+    protected static ?string $pluralModelLabel = 'Customer Types';
 
     public static function form(Schema $schema): Schema
     {

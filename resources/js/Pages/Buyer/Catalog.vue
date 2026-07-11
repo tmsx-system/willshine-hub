@@ -9,6 +9,7 @@ defineOptions({ layout: BuyerLayout });
 const props = defineProps({
     categories: { type: Array, required: true },
     products:   { type: Array, required: true },
+    uses_customer_rules: { type: Boolean, default: false },
 });
 
 const activeCategory = ref('Semua');
@@ -37,12 +38,16 @@ const filteredProducts = computed(() => {
 const cartCount = computed(() => cartItems.value.reduce((sum, i) => sum + i.qty, 0));
 
 function handleAddToCart({ product, qty }) {
+    const maxQty = Number(product.maximum_qty || product.daily_quantity || 0);
     const existing = cartItems.value.find(i => i.id === product.id);
+
     if (existing) {
-        existing.qty += qty;
+        const nextQty = existing.qty + qty;
+        existing.qty = maxQty > 0 ? Math.min(nextQty, maxQty) : nextQty;
     } else {
-        cartItems.value.push({ ...product, qty });
+        cartItems.value.push({ ...product, qty: maxQty > 0 ? Math.min(qty, maxQty) : qty });
     }
+
     showCartToast.value = true;
     setTimeout(() => { showCartToast.value = false; }, 2000);
 }
@@ -67,6 +72,9 @@ const stockCounts = computed(() => ({
                 <span class="text-emerald-600 font-medium">{{ stockCounts.full }} tersedia</span>,
                 <span class="text-amber-600 font-medium">{{ stockCounts.low }} terbatas</span>,
                 <span class="text-red-500 font-medium">{{ stockCounts.empty }} habis</span>
+            </p>
+            <p v-if="uses_customer_rules" class="mt-2 inline-flex rounded-full bg-pink-50 px-3 py-1 text-xs font-bold text-pink-700 ring-1 ring-pink-100">
+                Katalog dan alokasi qty mengikuti setting customer.
             </p>
         </div>
 

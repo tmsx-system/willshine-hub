@@ -31,7 +31,8 @@ class ErpCustomerForm
                             ->relationship('customerType', 'name')
                             ->searchable()
                             ->preload(),
-                    ]),
+                    ])
+                      ->columnSpan('full'),
                 Section::make('ERP Profile')
                     ->columns(2)
                     ->schema([

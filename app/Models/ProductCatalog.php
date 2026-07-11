@@ -25,4 +25,9 @@ class ProductCatalog extends Model
     {
         return $this->belongsTo(ProductCategory::class, 'category_id');
     }
+
+    public function customerRules()
+    {
+        return $this->hasMany(CustomerProductCatalog::class, 'product_catalog_id');
+    }
 }

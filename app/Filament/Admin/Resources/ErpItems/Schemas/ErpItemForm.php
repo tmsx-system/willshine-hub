@@ -3,7 +3,6 @@
 namespace App\Filament\Admin\Resources\ErpItems\Schemas;
 
 use Filament\Forms\Components\DateTimePicker;
-use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
@@ -39,12 +38,11 @@ class ErpItemForm
                     ->schema([
                         Textarea::make('description')
                             ->columnSpanFull(),
-                        FileUpload::make('image_url')
-                            ->label('ERP Image')
-                            ->image(),
-                        FileUpload::make('website_image_url')
-                            ->label('Website Image')
-                            ->image(),
+                        TextInput::make('image_url')
+                            ->label('ERP Image URL')
+                            ->disabled()
+                            ->dehydrated()
+                            ->helperText('Sumber gambar dari ERP. Upload gambar frontend dilakukan satu tempat saja di Product Catalog > Display Image.'),
                     ]),
                 Section::make('Inventory Flags')
                     ->columns(2)

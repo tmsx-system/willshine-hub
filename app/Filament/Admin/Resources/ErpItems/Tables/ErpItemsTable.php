@@ -27,9 +27,8 @@ class ErpItemsTable
                 TextColumn::make('stock_uom')
                     ->searchable(),
                 TextColumn::make('brand')
-                    ->searchable(),
-                ImageColumn::make('image_url'),
-                ImageColumn::make('website_image_url'),
+                    ->searchable()
+                     ->toggleable(isToggledHiddenByDefault: true),
                 IconColumn::make('is_stock_item')
                     ->boolean(),
                 IconColumn::make('disabled')
@@ -37,13 +36,16 @@ class ErpItemsTable
                 IconColumn::make('has_batch_no')
                     ->boolean(),
                 IconColumn::make('has_serial_no')
-                    ->boolean(),
+                    ->boolean()
+                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('erp_modified_at')
                     ->dateTime()
-                    ->sortable(),
+                    ->sortable()
+                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('last_synced_at')
                     ->dateTime()
-                    ->sortable(),
+                    ->sortable()
+                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

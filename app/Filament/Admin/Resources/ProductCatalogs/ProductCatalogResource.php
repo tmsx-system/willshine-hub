@@ -18,7 +18,17 @@ class ProductCatalogResource extends Resource
 {
     protected static ?string $model = ProductCatalog::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedShoppingBag;
+
+    protected static \UnitEnum|string|null $navigationGroup = 'Products';
+
+    protected static ?int $navigationSort = 30;
+
+    protected static ?string $navigationLabel = 'Product Catalogs';
+
+    protected static ?string $modelLabel = 'Product Catalog';
+
+    protected static ?string $pluralModelLabel = 'Product Catalogs';
 
     public static function form(Schema $schema): Schema
     {

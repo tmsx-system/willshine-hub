@@ -48,9 +48,6 @@ class ErpSettingForm
                 Section::make('Sync Status')
                     ->columns(2)
                     ->schema([
-                        Toggle::make('enable_auto_sync')
-                            ->label('Enable Auto Sync')
-                            ->required(),
                         DateTimePicker::make('last_sync_customer')
                             ->label('Last Customer Sync')
                             ->disabled(),
@@ -63,7 +60,11 @@ class ErpSettingForm
                         DateTimePicker::make('last_sync_price')
                             ->label('Last Price Sync')
                             ->disabled(),
-                    ]),
+                        Toggle::make('enable_auto_sync')
+                            ->label('Enable Auto Sync')
+                            ->required(),
+                    ])
+                    ->columnSpan('full'),
             ]);
     }
 }

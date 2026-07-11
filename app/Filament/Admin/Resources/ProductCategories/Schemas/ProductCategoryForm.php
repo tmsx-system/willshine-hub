@@ -26,8 +26,10 @@ class ProductCategoryForm
                             ->columnSpanFull(),
                         FileUpload::make('image_url')
                             ->label('Image')
-                            ->image(),
-                    ]),
+                            ->image()
+                            ->columnSpanFull(),
+                    ])
+                    ->columnSpanFull(),
                 Section::make('Display')
                     ->columns(2)
                     ->schema([
@@ -39,7 +41,8 @@ class ProductCategoryForm
                         Toggle::make('is_active')
                             ->label('Active')
                             ->required(),
-                    ]),
+                    ])
+                    ->columnSpanFull(),
             ]);
     }
 }

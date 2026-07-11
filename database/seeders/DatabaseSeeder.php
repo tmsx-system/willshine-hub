@@ -8,6 +8,7 @@ use App\Models\ErpItem;
 use App\Models\ProductCatalog;
 use App\Models\ProductCategory;
 use App\Models\User;
+use App\Services\ERP\CustomerService;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -31,35 +32,10 @@ class DatabaseSeeder extends Seeder
             );
         }
 
-        $retail = CustomerType::updateOrCreate(
-            ['code' => 'RETAIL'],
-            [
-                'name' => 'Retail Buyer',
-                'description' => 'Sample customer type for small shops and individual buyers.',
-                'default_price_list' => 'Standard Selling',
-                'default_warehouse' => 'Stores - WSH',
-                'minimum_order_amount' => 0,
-                'minimum_order_qty' => 1,
-                'allow_reward' => true,
-                'allow_promo' => true,
-                'is_active' => true,
-            ],
-        );
+        CustomerService::seedDefaultCustomerTypes();
 
-        $wholesale = CustomerType::updateOrCreate(
-            ['code' => 'WHOLESALE'],
-            [
-                'name' => 'Wholesale Buyer',
-                'description' => 'Sample customer type for bulk fruit orders.',
-                'default_price_list' => 'Wholesale Selling',
-                'default_warehouse' => 'Stores - WSH',
-                'minimum_order_amount' => 500000,
-                'minimum_order_qty' => 10,
-                'allow_reward' => false,
-                'allow_promo' => true,
-                'is_active' => true,
-            ],
-        );
+        $retail = CustomerType::where('code', 'RETAIL')->firstOrFail();
+        $distributor = CustomerType::where('code', 'DISTRIBUTOR')->firstOrFail();
 
         ErpCustomer::updateOrCreate(
             ['erp_customer_id' => 'CUST-SAMPLE-001'],
@@ -83,10 +59,10 @@ class DatabaseSeeder extends Seeder
             [
                 'customer_code' => 'CUST-SAMPLE-002',
                 'customer_name' => 'Distributor Buah Nusantara',
-                'customer_group' => 'Wholesale',
+                'customer_group' => 'DISTRIBUTOR',
                 'territory' => 'Indonesia',
-                'customer_type_id' => $wholesale->id,
-                'default_price_list' => 'Wholesale Selling',
+                'customer_type_id' => $distributor->id,
+                'default_price_list' => 'Distributor Selling',
                 'default_warehouse' => 'Stores - WSH',
                 'credit_limit' => 15000000,
                 'disabled' => false,
@@ -128,7 +104,6 @@ class DatabaseSeeder extends Seeder
                 'description' => 'Pisang Cavendish matang segar untuk contoh katalog buyer.',
                 'brand' => 'Willshine Fresh',
                 'image_url' => 'images/banana_organic.png',
-                'website_image_url' => 'images/banana_organic.png',
                 'category' => $categories['buah-segar'],
                 'display_order' => 1,
                 'minimum_qty' => 1,
@@ -144,7 +119,6 @@ class DatabaseSeeder extends Seeder
                 'description' => 'Anggur merah manis dengan kemasan rapi untuk pesanan retail.',
                 'brand' => 'Willshine Fresh',
                 'image_url' => 'images/hero_fruits.png',
-                'website_image_url' => 'images/hero_fruits.png',
                 'category' => $categories['buah-premium'],
                 'display_order' => 2,
                 'minimum_qty' => 1,
@@ -160,7 +134,6 @@ class DatabaseSeeder extends Seeder
                 'description' => 'Mangga madu harum dan manis sebagai contoh produk unggulan.',
                 'brand' => 'Willshine Fresh',
                 'image_url' => 'images/honey_mango.png',
-                'website_image_url' => 'images/honey_mango.png',
                 'category' => $categories['buah-premium'],
                 'display_order' => 3,
                 'minimum_qty' => 1,
@@ -176,7 +149,6 @@ class DatabaseSeeder extends Seeder
                 'description' => 'Buah naga merah segar untuk contoh tampilan produk katalog.',
                 'brand' => 'Willshine Fresh',
                 'image_url' => 'images/dragon_fruit.png',
-                'website_image_url' => 'images/dragon_fruit.png',
                 'category' => $categories['buah-segar'],
                 'display_order' => 4,
                 'minimum_qty' => 1,
@@ -192,7 +164,6 @@ class DatabaseSeeder extends Seeder
                 'description' => 'Apel Fuji renyah untuk contoh data katalog produk.',
                 'brand' => 'Willshine Fresh',
                 'image_url' => 'images/apple_fuji.png',
-                'website_image_url' => 'images/apple_fuji.png',
                 'category' => $categories['buah-premium'],
                 'display_order' => 5,
                 'minimum_qty' => 1,
@@ -212,7 +183,6 @@ class DatabaseSeeder extends Seeder
                     'description' => $sampleProduct['description'],
                     'brand' => $sampleProduct['brand'],
                     'image_url' => $sampleProduct['image_url'],
-                    'website_image_url' => $sampleProduct['website_image_url'],
                     'is_stock_item' => true,
                     'disabled' => false,
                     'has_batch_no' => false,
@@ -230,7 +200,7 @@ class DatabaseSeeder extends Seeder
                     'category_id' => $sampleProduct['category']->id,
                     'display_name' => $item->item_name,
                     'display_description' => $item->description,
-                    'display_image_url' => $item->website_image_url ?: $item->image_url,
+                    'display_image_url' => $item->image_url,
                     'is_visible' => true,
                     'is_featured' => $sampleProduct['featured'],
                     'display_order' => $sampleProduct['display_order'],

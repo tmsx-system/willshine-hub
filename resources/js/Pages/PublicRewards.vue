@@ -1,5 +1,6 @@
 <script setup>
 import { Link } from '@inertiajs/vue3';
+import { BadgePercent, Gift, Sparkles, Star, Ticket, Truck } from 'lucide-vue-next';
 import PublicLayout from '@/Layouts/PublicLayout.vue';
 
 defineProps({
@@ -7,11 +8,13 @@ defineProps({
 });
 
 const benefits = [
-    ['Exclusive offers', 'Customer-only promotions and limited product bundles.'],
-    ['Special discounts', 'Redeem points for discounts on selected orders.'],
-    ['Early product access', 'Get updates when seasonal products become available.'],
-    ['Better repeat orders', 'Rewards designed for personal and business customers.'],
+    { title: 'Exclusive offers', desc: 'Customer-only promotions and limited product bundles.', icon: Sparkles },
+    { title: 'Special discounts', desc: 'Redeem points for discounts on selected orders.', icon: BadgePercent },
+    { title: 'Early product access', desc: 'Get updates when seasonal products become available.', icon: Star },
+    { title: 'Better repeat orders', desc: 'Rewards designed for personal and business customers.', icon: Gift },
 ];
+
+const rewardIcons = [Truck, BadgePercent, Gift, Ticket];
 </script>
 
 <template>
@@ -35,7 +38,7 @@ const benefits = [
                         </Link>
                     </div>
                 </div>
-                <div class="rounded-[2rem] border border-[#FBCFE8] bg-white p-6 shadow-[0_24px_70px_rgba(157,23,77,.12)]">
+                <div class="rounded-[2rem] border border-[#FBCFE8] bg-white p-6 shadow-[0_24px_70px_rgba(236,72,153,.16)]">
                     <p class="text-sm font-bold text-[#6B7280]">Reward progress preview</p>
                     <div class="mt-5 flex items-end justify-between">
                         <div>
@@ -54,14 +57,12 @@ const benefits = [
 
         <section class="public-container py-12">
             <div class="grid gap-5 md:grid-cols-4">
-                <article v-for="benefit in benefits" :key="benefit[0]" class="rounded-[1.4rem] border border-[#E5E7EB] bg-white p-6 shadow-sm">
-                    <div class="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#FCE7F3] text-[#BE185D]">
-                        <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3l2.4 4.9 5.4.8-3.9 3.8.9 5.4L12 15.4 7.2 18l.9-5.4-3.9-3.8 5.4-.8L12 3z" />
-                        </svg>
+                <article v-for="benefit in benefits" :key="benefit.title" class="group rounded-[1.4rem] border border-[#FBCFE8] bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-[#F9A8D4] hover:shadow-[0_24px_50px_rgba(236,72,153,.15)]">
+                    <div class="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#FCE7F3] text-[#BE185D] transition group-hover:bg-[#EC4899] group-hover:text-white">
+                        <component :is="benefit.icon" class="h-6 w-6" />
                     </div>
-                    <h3 class="font-black text-[#111827]">{{ benefit[0] }}</h3>
-                    <p class="mt-3 text-sm leading-6 text-[#6B7280]">{{ benefit[1] }}</p>
+                    <h3 class="font-black text-[#111827]">{{ benefit.title }}</h3>
+                    <p class="mt-3 text-sm leading-6 text-[#6B7280]">{{ benefit.desc }}</p>
                 </article>
             </div>
         </section>
@@ -76,12 +77,10 @@ const benefits = [
                 <article
                     v-for="reward in rewards"
                     :key="reward.id"
-                    class="overflow-hidden rounded-[1.4rem] border border-[#E5E7EB] bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-[#FBCFE8] hover:shadow-xl hover:shadow-pink-900/10"
+                    class="group overflow-hidden rounded-[1.4rem] border border-[#FBCFE8] bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-[#F9A8D4] hover:shadow-[0_24px_50px_rgba(236,72,153,.16)]"
                 >
-                    <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#FCE7F3] text-[#BE185D]">
-                        <svg class="h-8 w-8" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" :d="reward.icon"></path>
-                        </svg>
+                    <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#FCE7F3] text-[#BE185D] transition group-hover:bg-[#EC4899] group-hover:text-white">
+                        <component :is="rewardIcons[(reward.id - 1) % rewardIcons.length]" class="h-8 w-8" />
                     </div>
                     <span class="mt-6 inline-flex rounded-full bg-[#FDF2F8] px-3 py-1 text-xs font-bold text-[#BE185D]">
                         {{ reward.points }}

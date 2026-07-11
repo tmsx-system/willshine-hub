@@ -18,7 +18,17 @@ class ErpSettingResource extends Resource
 {
     protected static ?string $model = ErpSetting::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCog6Tooth;
+
+    protected static \UnitEnum|string|null $navigationGroup = 'ERP';
+
+    protected static ?int $navigationSort = 10;
+
+    protected static ?string $navigationLabel = 'ERP Settings';
+
+    protected static ?string $modelLabel = 'ERP Setting';
+
+    protected static ?string $pluralModelLabel = 'ERP Settings';
 
     protected static ?string $recordTitleAttribute = 'name';
 

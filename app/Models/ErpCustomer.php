@@ -24,4 +24,9 @@ class ErpCustomer extends Model
     {
         return $this->hasMany(User::class, 'customer_id');
     }
+
+    public function productCatalogRules()
+    {
+        return $this->hasMany(CustomerProductCatalog::class, 'customer_id');
+    }
 }

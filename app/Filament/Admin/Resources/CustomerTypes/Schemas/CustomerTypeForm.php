@@ -54,7 +54,8 @@ class CustomerTypeForm
                         Toggle::make('is_active')
                             ->label('Active')
                             ->required(),
-                    ]),
+                    ])
+                    ->columnSpan('full'),
             ]);
     }
 }
