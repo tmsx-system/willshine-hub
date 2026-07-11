@@ -29,6 +29,9 @@ class ErpItemsTable
                 TextColumn::make('brand')
                     ->searchable()
                      ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('company')
+                    ->searchable()
+                    ->sortable(),
                 IconColumn::make('is_stock_item')
                     ->boolean(),
                 IconColumn::make('disabled')

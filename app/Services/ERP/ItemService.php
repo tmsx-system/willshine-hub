@@ -26,6 +26,14 @@ class ItemService
             $limit = 100;
             $start = 0;
             $hasMore = true;
+            $setting = $this->client->getSetting();
+            $company = $setting?->default_company;
+            $allowedItemCodes = $this->resolveAllowedItemCodes();
+            $syncedItemIds = [];
+
+            if ($allowedItemCodes === []) {
+                throw new Exception('No ERP item codes were found for the selected Default Warehouse/Company. Set Default Warehouse to a warehouse under Distribusi Jakarta, then sync again.');
+            }
 
             while ($hasMore) {
                 $query = [
@@ -42,17 +50,24 @@ class ItemService
                 }
 
                 foreach ($items as $data) {
+                    $itemCode = $data['item_code'] ?? $data['name'];
+
+                    if ($allowedItemCodes !== null && !in_array($itemCode, $allowedItemCodes, true)) {
+                        continue;
+                    }
+
                     $imageUrl = $this->absoluteFileUrl($data['image'] ?? null);
 
                     $item = ErpItem::updateOrCreate(
                         ['erp_item_id' => $data['name']],
                         [
-                            'item_code' => $data['item_code'] ?? $data['name'],
+                            'item_code' => $itemCode,
                             'item_name' => $data['item_name'] ?? $data['name'],
                             'item_group' => $data['item_group'] ?? null,
                             'stock_uom' => $data['stock_uom'] ?? null,
                             'description' => $data['description'] ?? null,
                             'brand' => $data['brand'] ?? null,
+                            'company' => $data['company'] ?? $company,
                             'image_url' => $imageUrl,
                             'is_stock_item' => $data['is_stock_item'] ?? true,
                             'disabled' => $data['disabled'] ?? false,
@@ -62,6 +77,7 @@ class ItemService
                             'last_synced_at' => now(),
                         ]
                     );
+                    $syncedItemIds[] = $item->id;
 
                     $category = $this->resolveCategory($item->item_group);
 
@@ -100,8 +116,13 @@ class ItemService
                 }
             }
 
+            if ($company && $syncedItemIds !== []) {
+                ErpItem::query()
+                    ->whereNotIn('id', $syncedItemIds)
+                    ->update(['disabled' => true]);
+            }
+
             // Update the last sync timestamp in settings
-            $setting = $this->client->getSetting();
             if ($setting) {
                 $setting->update(['last_sync_item' => now()]);
             }
@@ -111,6 +132,115 @@ class ItemService
             Log::error("Failed to sync items: " . $e->getMessage());
             throw $e;
         }
+    }
+
+    private function resolveAllowedItemCodes(): ?array
+    {
+        $setting = $this->client->getSetting();
+        $warehouse = $setting?->default_warehouse;
+        $company = $setting?->default_company;
+
+        if (!$warehouse && !$company) {
+            return null;
+        }
+
+        if ($company) {
+            $companyItemCodes = $this->itemCodesForCompany($company);
+
+            if ($companyItemCodes !== []) {
+                return $companyItemCodes;
+            }
+        }
+
+        $warehouses = $warehouse ? [$warehouse] : $this->warehousesForCompany($company);
+
+        if ($warehouses === []) {
+            Log::warning("Item sync skipped company filter because no warehouses were found for company: {$company}");
+
+            return [];
+        }
+
+        $codes = [];
+
+        foreach ($warehouses as $warehouseName) {
+            $start = 0;
+            $limit = 500;
+
+            do {
+                $bins = $this->client->get('Bin', [
+                    'fields' => '["item_code"]',
+                    'filters' => json_encode([
+                        ['warehouse', '=', $warehouseName],
+                    ]),
+                    'limit_page_length' => $limit,
+                    'limit_start' => $start,
+                ]);
+
+                foreach ($bins as $bin) {
+                    if (!empty($bin['item_code'])) {
+                        $codes[] = $bin['item_code'];
+                    }
+                }
+
+                $start += $limit;
+            } while (count($bins) === $limit);
+        }
+
+        return array_values(array_unique($codes));
+    }
+
+    private function itemCodesForCompany(string $company): array
+    {
+        try {
+            $codes = [];
+            $start = 0;
+            $limit = 500;
+
+            do {
+                $items = $this->client->get('Item', [
+                    'fields' => '["name", "item_code"]',
+                    'filters' => json_encode([
+                        ['company', '=', $company],
+                    ]),
+                    'limit_page_length' => $limit,
+                    'limit_start' => $start,
+                ]);
+
+                foreach ($items as $item) {
+                    $codes[] = $item['item_code'] ?? $item['name'];
+                }
+
+                $start += $limit;
+            } while (count($items) === $limit);
+
+            return array_values(array_unique(array_filter($codes)));
+        } catch (Exception $exception) {
+            Log::warning("Item company filter failed for {$company}; falling back to warehouse/Bin lookup: " . $exception->getMessage());
+
+            return [];
+        }
+    }
+
+    private function warehousesForCompany(?string $company): array
+    {
+        if (!$company) {
+            return [];
+        }
+
+        $warehouses = $this->client->get('Warehouse', [
+            'fields' => '["name"]',
+            'filters' => json_encode([
+                ['company', '=', $company],
+                ['is_group', '=', 0],
+            ]),
+            'limit_page_length' => 500,
+        ]);
+
+        return collect($warehouses)
+            ->pluck('name')
+            ->filter()
+            ->values()
+            ->all();
     }
 
     public function syncProductCategories(): bool

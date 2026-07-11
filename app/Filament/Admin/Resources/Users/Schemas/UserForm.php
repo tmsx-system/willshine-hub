@@ -23,19 +23,7 @@ class UserForm
                 TextInput::make('password')
                     ->password()
                     ->required(),
-                TextInput::make('customer_id')
-                    ->numeric(),
-                TextInput::make('customer_name'),
-                TextInput::make('customer_type_id')
-                    ->numeric(),
-                TextInput::make('sales_person'),
                 Toggle::make('is_active')
-                    ->required(),
-                Toggle::make('can_order')
-                    ->required(),
-                Toggle::make('can_view_price')
-                    ->required(),
-                Toggle::make('can_view_reward')
                     ->required(),
                 DateTimePicker::make('last_login_at'),
             ]);

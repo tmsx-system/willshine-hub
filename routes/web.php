@@ -183,9 +183,9 @@ Route::middleware('guest')->group(function () {
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-Route::prefix('buyer')->name('buyer.')->middleware('auth')->group(function () use ($buyerRewards, $rewardHistory, $publicImageUrl) {
+Route::prefix('buyer')->name('buyer.')->middleware('auth:customer')->group(function () use ($buyerRewards, $rewardHistory, $publicImageUrl) {
     Route::get('/', function (Request $request) {
-        $user = $request->user();
+        $user = $request->user('customer');
 
         return Inertia::render('Buyer/Dashboard', [
             'buyer' => [
@@ -206,7 +206,7 @@ Route::prefix('buyer')->name('buyer.')->middleware('auth')->group(function () us
     })->name('dashboard');
 
     Route::get('/catalog', function (Request $request) use ($publicImageUrl) {
-        $customerId = $request->user()->customer_id;
+        $customerId = $request->user('customer')->customer_id;
         $customerRules = collect();
 
         if ($customerId) {
@@ -295,7 +295,7 @@ Route::prefix('buyer')->name('buyer.')->middleware('auth')->group(function () us
     ]))->name('rewards');
 
     Route::get('/settings', function (Request $request) {
-        $user = $request->user();
+        $user = $request->user('customer');
 
         return Inertia::render('Buyer/Settings', [
             'buyer' => [

@@ -16,12 +16,12 @@ class AuthController extends Controller
             'password' => ['required'],
         ]);
 
-        if (Auth::attempt($credentials, $request->boolean('remember'))) {
-            $user = Auth::user();
+        if (Auth::guard('customer')->attempt($credentials, $request->boolean('remember'))) {
+            $user = Auth::guard('customer')->user();
             
             // Check restrictions
             if (!$user->is_active) {
-                Auth::logout();
+                Auth::guard('customer')->logout();
                 throw ValidationException::withMessages([
                     'email' => 'Akun Anda telah dinonaktifkan. Silakan hubungi admin.',
                 ]);
@@ -42,7 +42,8 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
-        Auth::logout();
+        Auth::guard('customer')->logout();
+        Auth::guard('web')->logout();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();

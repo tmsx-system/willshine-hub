@@ -16,7 +16,7 @@ class User extends Authenticatable implements FilamentUser
 
     public function canAccessPanel(Panel $panel): bool
     {
-        return blank($this->customer_id);
+        return $this->is_active ?? true;
     }
 
     /**
@@ -28,26 +28,9 @@ class User extends Authenticatable implements FilamentUser
         'name',
         'email',
         'password',
-        'customer_id',
-        'customer_name',
-        'customer_type_id',
-        'sales_person',
         'is_active',
-        'can_order',
-        'can_view_price',
-        'can_view_reward',
         'last_login_at',
     ];
-
-    public function customer()
-    {
-        return $this->belongsTo(ErpCustomer::class, 'customer_id');
-    }
-
-    public function customerType()
-    {
-        return $this->belongsTo(CustomerType::class, 'customer_type_id');
-    }
 
     /**
      * The attributes that should be hidden for serialization.
@@ -69,6 +52,7 @@ class User extends Authenticatable implements FilamentUser
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_active' => 'boolean',
         ];
     }
 }

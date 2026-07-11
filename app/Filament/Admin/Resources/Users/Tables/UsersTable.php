@@ -31,23 +31,7 @@ class UsersTable
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('customer_id')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('customer_name')
-                    ->searchable(),
-                TextColumn::make('customer_type_id')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('sales_person')
-                    ->searchable(),
                 IconColumn::make('is_active')
-                    ->boolean(),
-                IconColumn::make('can_order')
-                    ->boolean(),
-                IconColumn::make('can_view_price')
-                    ->boolean(),
-                IconColumn::make('can_view_reward')
                     ->boolean(),
                 TextColumn::make('last_login_at')
                     ->dateTime()

@@ -32,6 +32,10 @@ class ErpItemForm
                         TextInput::make('stock_uom')
                             ->label('Stock UOM'),
                         TextInput::make('brand'),
+                        TextInput::make('company')
+                            ->label('Company')
+                            ->disabled()
+                            ->dehydrated(),
                     ]),
                 Section::make('Content')
                     ->columns(2)
