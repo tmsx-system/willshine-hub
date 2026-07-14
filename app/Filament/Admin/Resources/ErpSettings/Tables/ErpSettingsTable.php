@@ -2,6 +2,7 @@
 
 namespace App\Filament\Admin\Resources\ErpSettings\Tables;
 
+use App\Filament\Admin\Resources\Concerns\HasDateRangeFilters;
 use App\Services\ERP\FrappeClient;
 use App\Models\ErpSetting;
 use Filament\Actions\Action;
@@ -13,11 +14,16 @@ use Filament\Actions\ActionGroup;
 use Filament\Notifications\Notification;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Throwable;
 
 class ErpSettingsTable
 {
+    use HasDateRangeFilters;
+
     public static function configure(Table $table): Table
     {
         return $table
@@ -74,8 +80,32 @@ class ErpSettingsTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
-            ])
+                SelectFilter::make('default_company')
+                    ->label('Default Company')
+                    ->searchable()
+                    ->options(fn (): array => ErpSetting::query()
+                        ->whereNotNull('default_company')
+                        ->distinct()
+                        ->orderBy('default_company')
+                        ->pluck('default_company', 'default_company')
+                        ->all()),
+                SelectFilter::make('default_selling_price_list')
+                    ->label('Price List Default')
+                    ->searchable()
+                    ->options(fn (): array => ErpSetting::query()
+                        ->whereNotNull('default_selling_price_list')
+                        ->distinct()
+                        ->orderBy('default_selling_price_list')
+                        ->pluck('default_selling_price_list', 'default_selling_price_list')
+                        ->all()),
+                TernaryFilter::make('enable_auto_sync')
+                    ->label('Auto Sinkron')
+                    ->trueLabel('Aktif')
+                    ->falseLabel('Nonaktif'),
+                self::dateRangeFilter('last_sync_customer', 'Tanggal Sinkron Pelanggan'),
+                self::dateRangeFilter('last_sync_item', 'Tanggal Sinkron Item'),
+                self::dateRangeFilter('last_sync_price', 'Tanggal Sinkron Harga'),
+            ], layout: FiltersLayout::AboveContent)
             ->recordActions([
                 ActionGroup::make([
                     Action::make('testConnection')

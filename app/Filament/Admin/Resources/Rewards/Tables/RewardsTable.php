@@ -2,16 +2,21 @@
 
 namespace App\Filament\Admin\Resources\Rewards\Tables;
 
+use App\Filament\Admin\Resources\Concerns\HasDateRangeFilters;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 
 class RewardsTable
 {
+    use HasDateRangeFilters;
+
     public static function configure(Table $table): Table
     {
         return $table
@@ -56,7 +61,13 @@ class RewardsTable
                         'Cashback' => 'Cashback',
                         'Service' => 'Layanan',
                     ]),
-            ])
+                TernaryFilter::make('is_active')
+                    ->label('Aktif')
+                    ->trueLabel('Aktif')
+                    ->falseLabel('Nonaktif'),
+                self::dateRangeFilter('valid_until', 'Tanggal Berlaku'),
+                self::dateRangeFilter('updated_at', 'Tanggal Diubah'),
+            ], layout: FiltersLayout::AboveContent)
             ->recordActions([
                 EditAction::make()->label('Ubah'),
             ])

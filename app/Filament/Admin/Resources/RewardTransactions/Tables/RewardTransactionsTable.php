@@ -2,12 +2,16 @@
 
 namespace App\Filament\Admin\Resources\RewardTransactions\Tables;
 
+use App\Filament\Admin\Resources\Concerns\HasDateRangeFilters;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 
 class RewardTransactionsTable
 {
+    use HasDateRangeFilters;
+
     public static function configure(Table $table): Table
     {
         return $table
@@ -58,6 +62,12 @@ class RewardTransactionsTable
                         'adjustment' => 'Penyesuaian',
                         'bonus' => 'Bonus',
                     ]),
-            ]);
+                SelectFilter::make('customer_account_id')
+                    ->label('Akun Pelanggan')
+                    ->relationship('customerAccount', 'customer_name')
+                    ->searchable()
+                    ->preload(),
+                self::dateRangeFilter('created_at', 'Tanggal Transaksi'),
+            ], layout: FiltersLayout::AboveContent);
     }
 }

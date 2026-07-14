@@ -2,7 +2,9 @@
 
 namespace App\Filament\Admin\Resources\PurchaseRequests\Tables;
 
+use App\Filament\Admin\Resources\Concerns\HasDateRangeFilters;
 use App\Models\PurchaseRequest;
+use App\Models\User;
 use App\Services\ERP\SalesOrderService;
 use App\Services\RewardService;
 use Filament\Actions\Action;
@@ -13,12 +15,16 @@ use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Section;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Throwable;
 
 class PurchaseRequestsTable
 {
+    use HasDateRangeFilters;
+
     public static function configure(Table $table): Table
     {
         return $table
@@ -72,12 +78,31 @@ class PurchaseRequestsTable
             ])
             ->filters([
                 SelectFilter::make('status')
+                    ->label('Status')
                     ->options([
                         'pending' => 'Menunggu',
                         'approved' => 'Disetujui',
                         'rejected' => 'Ditolak',
                     ]),
-            ])
+                SelectFilter::make('customer_account_id')
+                    ->label('Akun Pelanggan')
+                    ->relationship('customerAccount', 'customer_name')
+                    ->searchable()
+                    ->preload(),
+                SelectFilter::make('sales_user_id')
+                    ->label('Sales')
+                    ->searchable()
+                    ->options(fn (): array => User::query()
+                        ->whereHas('assignedCustomerAccounts')
+                        ->orderBy('name')
+                        ->pluck('name', 'id')
+                        ->all())
+                    ->query(fn (Builder $query, array $data): Builder => $query
+                        ->when($data['value'] ?? null, fn (Builder $query, string $value): Builder => $query
+                            ->whereHas('customerAccount', fn (Builder $query): Builder => $query->where('sales_user_id', $value)))),
+                self::dateRangeFilter('created_at', 'Tanggal Pengajuan'),
+                self::dateRangeFilter('approved_at', 'Tanggal Disetujui'),
+            ], layout: FiltersLayout::AboveContent)
             ->recordActions([
                 Action::make('viewItems')
                     ->label('Lihat Item')

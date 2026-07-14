@@ -2,15 +2,21 @@
 
 namespace App\Filament\Admin\Resources\ErpCustomers\Tables;
 
+use App\Filament\Admin\Resources\Concerns\HasDateRangeFilters;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 
 class ErpCustomersTable
 {
+    use HasDateRangeFilters;
+
     public static function configure(Table $table): Table
     {
         return $table
@@ -67,8 +73,44 @@ class ErpCustomersTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
-            ])
+                SelectFilter::make('customer_type_id')
+                    ->label('Tipe Pelanggan')
+                    ->relationship('customerType', 'name')
+                    ->searchable()
+                    ->preload(),
+                SelectFilter::make('customer_group')
+                    ->label('Grup Pelanggan')
+                    ->searchable()
+                    ->options(fn (): array => \App\Models\ErpCustomer::query()
+                        ->whereNotNull('customer_group')
+                        ->distinct()
+                        ->orderBy('customer_group')
+                        ->pluck('customer_group', 'customer_group')
+                        ->all()),
+                SelectFilter::make('territory')
+                    ->label('Area')
+                    ->searchable()
+                    ->options(fn (): array => \App\Models\ErpCustomer::query()
+                        ->whereNotNull('territory')
+                        ->distinct()
+                        ->orderBy('territory')
+                        ->pluck('territory', 'territory')
+                        ->all()),
+                SelectFilter::make('default_price_list')
+                    ->label('Price List Default')
+                    ->searchable()
+                    ->options(fn (): array => \App\Models\ErpCustomer::query()
+                        ->whereNotNull('default_price_list')
+                        ->distinct()
+                        ->orderBy('default_price_list')
+                        ->pluck('default_price_list', 'default_price_list')
+                        ->all()),
+                TernaryFilter::make('disabled')
+                    ->label('Status ERP')
+                    ->trueLabel('Nonaktif')
+                    ->falseLabel('Aktif'),
+                self::dateRangeFilter('last_synced_at', 'Tanggal Sinkron'),
+            ], layout: FiltersLayout::AboveContent)
             ->recordActions([
                 EditAction::make()->label('Ubah'),
             ])

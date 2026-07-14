@@ -2,19 +2,25 @@
 
 namespace App\Filament\Admin\Resources\RewardRedemptions\Tables;
 
+use App\Filament\Admin\Resources\Concerns\HasDateRangeFilters;
 use App\Models\RewardRedemption;
+use App\Models\User;
 use App\Services\RewardService;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Throwable;
 
 class RewardRedemptionsTable
 {
+    use HasDateRangeFilters;
+
     public static function configure(Table $table): Table
     {
         return $table
@@ -61,12 +67,36 @@ class RewardRedemptionsTable
             ])
             ->filters([
                 SelectFilter::make('status')
+                    ->label('Status')
                     ->options([
                         'pending' => 'Menunggu',
                         'approved' => 'Disetujui',
                         'rejected' => 'Ditolak',
                     ]),
-            ])
+                SelectFilter::make('customer_account_id')
+                    ->label('Akun Pelanggan')
+                    ->relationship('customerAccount', 'customer_name')
+                    ->searchable()
+                    ->preload(),
+                SelectFilter::make('reward_id')
+                    ->label('Reward')
+                    ->relationship('reward', 'name')
+                    ->searchable()
+                    ->preload(),
+                SelectFilter::make('sales_user_id')
+                    ->label('Sales')
+                    ->searchable()
+                    ->options(fn (): array => User::query()
+                        ->whereHas('assignedCustomerAccounts')
+                        ->orderBy('name')
+                        ->pluck('name', 'id')
+                        ->all())
+                    ->query(fn (Builder $query, array $data): Builder => $query
+                        ->when($data['value'] ?? null, fn (Builder $query, string $value): Builder => $query
+                            ->whereHas('customerAccount', fn (Builder $query): Builder => $query->where('sales_user_id', $value)))),
+                self::dateRangeFilter('created_at', 'Tanggal Pengajuan'),
+                self::dateRangeFilter('processed_at', 'Tanggal Diproses'),
+            ], layout: FiltersLayout::AboveContent)
             ->recordActions([
                 Action::make('approve')
                     ->label('Setujui')

@@ -2,15 +2,21 @@
 
 namespace App\Filament\Admin\Resources\CustomerProductCatalogs\Tables;
 
+use App\Filament\Admin\Resources\Concerns\HasDateRangeFilters;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 
 class CustomerProductCatalogsTable
 {
+    use HasDateRangeFilters;
+
     public static function configure(Table $table): Table
     {
         return $table
@@ -51,8 +57,22 @@ class CustomerProductCatalogsTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
-            ])
+                SelectFilter::make('customer_id')
+                    ->label('Pelanggan')
+                    ->relationship('customer', 'customer_name')
+                    ->searchable()
+                    ->preload(),
+                SelectFilter::make('product_catalog_id')
+                    ->label('Katalog Produk')
+                    ->relationship('productCatalog', 'display_name')
+                    ->searchable()
+                    ->preload(),
+                TernaryFilter::make('is_active')
+                    ->label('Aktif')
+                    ->trueLabel('Aktif')
+                    ->falseLabel('Nonaktif'),
+                self::dateRangeFilter('updated_at', 'Tanggal Diubah'),
+            ], layout: FiltersLayout::AboveContent)
             ->recordActions([
                 EditAction::make()->label('Ubah'),
             ])
