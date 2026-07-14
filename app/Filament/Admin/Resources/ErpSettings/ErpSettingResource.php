@@ -2,6 +2,7 @@
 
 namespace App\Filament\Admin\Resources\ErpSettings;
 
+use App\Filament\Admin\Resources\Concerns\HasResourceNavigationBadge;
 use App\Filament\Admin\Resources\ErpSettings\Pages\CreateErpSetting;
 use App\Filament\Admin\Resources\ErpSettings\Pages\EditErpSetting;
 use App\Filament\Admin\Resources\ErpSettings\Pages\ListErpSettings;
@@ -16,6 +17,8 @@ use Filament\Tables\Table;
 
 class ErpSettingResource extends Resource
 {
+    use HasResourceNavigationBadge;
+
     protected static ?string $model = ErpSetting::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCog6Tooth;

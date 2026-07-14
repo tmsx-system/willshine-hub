@@ -2,6 +2,7 @@
 
 namespace App\Filament\Admin\Resources\CustomerProductCatalogs;
 
+use App\Filament\Admin\Resources\Concerns\HasResourceNavigationBadge;
 use App\Filament\Admin\Resources\CustomerProductCatalogs\Pages\CreateCustomerProductCatalog;
 use App\Filament\Admin\Resources\CustomerProductCatalogs\Pages\EditCustomerProductCatalog;
 use App\Filament\Admin\Resources\CustomerProductCatalogs\Pages\ListCustomerProductCatalogs;
@@ -16,6 +17,8 @@ use Filament\Tables\Table;
 
 class CustomerProductCatalogResource extends Resource
 {
+    use HasResourceNavigationBadge;
+
     protected static ?string $model = CustomerProductCatalog::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedAdjustmentsHorizontal;

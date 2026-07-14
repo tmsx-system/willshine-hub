@@ -2,6 +2,7 @@
 
 namespace App\Filament\Admin\Resources\Users;
 
+use App\Filament\Admin\Resources\Concerns\HasResourceNavigationBadge;
 use App\Filament\Admin\Resources\Users\Pages\CreateUser;
 use App\Filament\Admin\Resources\Users\Pages\EditUser;
 use App\Filament\Admin\Resources\Users\Pages\ListUsers;
@@ -16,6 +17,8 @@ use Filament\Tables\Table;
 
 class UserResource extends Resource
 {
+    use HasResourceNavigationBadge;
+
     protected static ?string $model = User::class;
 
     protected static ?string $navigationLabel = 'Admin';
@@ -26,7 +29,7 @@ class UserResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUsers;
 
-    protected static \UnitEnum|string|null $navigationGroup = 'Team';
+    // protected static \UnitEnum|string|null $navigationGroup = 'Team';
 
     protected static ?int $navigationSort = 30;
 

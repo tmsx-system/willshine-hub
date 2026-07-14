@@ -2,6 +2,7 @@
 
 namespace App\Filament\Admin\Resources\ErpItems;
 
+use App\Filament\Admin\Resources\Concerns\HasResourceNavigationBadge;
 use App\Filament\Admin\Resources\ErpItems\Pages\CreateErpItem;
 use App\Filament\Admin\Resources\ErpItems\Pages\EditErpItem;
 use App\Filament\Admin\Resources\ErpItems\Pages\ListErpItems;
@@ -16,6 +17,8 @@ use Filament\Tables\Table;
 
 class ErpItemResource extends Resource
 {
+    use HasResourceNavigationBadge;
+
     protected static ?string $model = ErpItem::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCube;

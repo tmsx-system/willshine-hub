@@ -2,6 +2,7 @@
 
 namespace App\Filament\Admin\Resources\CustomerTypes;
 
+use App\Filament\Admin\Resources\Concerns\HasResourceNavigationBadge;
 use App\Filament\Admin\Resources\CustomerTypes\Pages\CreateCustomerType;
 use App\Filament\Admin\Resources\CustomerTypes\Pages\EditCustomerType;
 use App\Filament\Admin\Resources\CustomerTypes\Pages\ListCustomerTypes;
@@ -16,6 +17,8 @@ use Filament\Tables\Table;
 
 class CustomerTypeResource extends Resource
 {
+    use HasResourceNavigationBadge;
+
     protected static ?string $model = CustomerType::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedIdentification;

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Admin\Resources\ProductCatalogs;
 
+use App\Filament\Admin\Resources\Concerns\HasResourceNavigationBadge;
 use App\Filament\Admin\Resources\ProductCatalogs\Pages\CreateProductCatalog;
 use App\Filament\Admin\Resources\ProductCatalogs\Pages\EditProductCatalog;
 use App\Filament\Admin\Resources\ProductCatalogs\Pages\ListProductCatalogs;
@@ -16,6 +17,8 @@ use Filament\Tables\Table;
 
 class ProductCatalogResource extends Resource
 {
+    use HasResourceNavigationBadge;
+
     protected static ?string $model = ProductCatalog::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedShoppingBag;
@@ -45,6 +48,11 @@ class ProductCatalogResource extends Resource
         return [
             //
         ];
+    }
+
+    protected static function getNavigationBadgeColumn(): ?string
+    {
+        return 'is_visible';
     }
 
     public static function getPages(): array

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Admin\Resources\ErpCustomers;
 
+use App\Filament\Admin\Resources\Concerns\HasResourceNavigationBadge;
 use App\Filament\Admin\Resources\ErpCustomers\Pages\CreateErpCustomer;
 use App\Filament\Admin\Resources\ErpCustomers\Pages\EditErpCustomer;
 use App\Filament\Admin\Resources\ErpCustomers\Pages\ListErpCustomers;
@@ -16,6 +17,8 @@ use Filament\Tables\Table;
 
 class ErpCustomerResource extends Resource
 {
+    use HasResourceNavigationBadge;
+
     protected static ?string $model = ErpCustomer::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUserGroup;

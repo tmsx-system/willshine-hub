@@ -2,6 +2,7 @@
 
 namespace App\Filament\Admin\Resources\ProductCategories;
 
+use App\Filament\Admin\Resources\Concerns\HasResourceNavigationBadge;
 use App\Filament\Admin\Resources\ProductCategories\Pages\CreateProductCategory;
 use App\Filament\Admin\Resources\ProductCategories\Pages\EditProductCategory;
 use App\Filament\Admin\Resources\ProductCategories\Pages\ListProductCategories;
@@ -16,6 +17,8 @@ use Filament\Tables\Table;
 
 class ProductCategoryResource extends Resource
 {
+    use HasResourceNavigationBadge;
+
     protected static ?string $model = ProductCategory::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedTag;

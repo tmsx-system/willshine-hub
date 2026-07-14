@@ -2,6 +2,7 @@
 
 namespace App\Filament\Admin\Resources\CustomerAccounts;
 
+use App\Filament\Admin\Resources\Concerns\HasResourceNavigationBadge;
 use App\Filament\Admin\Resources\CustomerAccounts\Pages\CreateCustomerAccount;
 use App\Filament\Admin\Resources\CustomerAccounts\Pages\EditCustomerAccount;
 use App\Filament\Admin\Resources\CustomerAccounts\Pages\ListCustomerAccounts;
@@ -16,6 +17,8 @@ use Filament\Tables\Table;
 
 class CustomerAccountResource extends Resource
 {
+    use HasResourceNavigationBadge;
+
     protected static ?string $model = CustomerAccount::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUserCircle;
