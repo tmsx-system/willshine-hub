@@ -2,11 +2,13 @@
 
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Admin\ErpSettingSyncController;
+use App\Http\Controllers\Buyer\BuyerOrderController;
 use App\Models\CustomerProductCatalog;
 use App\Models\ErpItemPrice;
 use App\Models\ErpSetting;
 use App\Models\ErpItem;
 use App\Models\ProductCategory;
+use App\Models\PurchaseRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
@@ -164,6 +166,14 @@ Route::get('/admin/erp-settings/{record}/sync/{type}', ErpSettingSyncController:
 Route::prefix('buyer')->name('buyer.')->middleware('auth:customer')->group(function () use ($publicImageUrl, $erpItemPrice) {
     Route::get('/', function (Request $request) {
         $user = $request->user('customer');
+        $hasPurchaseRequestsTable = Schema::hasTable('purchase_requests');
+        $recentOrders = $hasPurchaseRequestsTable
+            ? PurchaseRequest::query()
+                ->where('customer_account_id', $user->id)
+                ->latest()
+                ->limit(5)
+                ->get()
+            : collect();
 
         return Inertia::render('Buyer/Dashboard', [
             'buyer' => [
@@ -175,11 +185,26 @@ Route::prefix('buyer')->name('buyer.')->middleware('auth:customer')->group(funct
             ],
             'stats' => [
                 'stock_allocation' => 0,
-                'pending_orders' => 0,
+                'pending_orders' => $hasPurchaseRequestsTable
+                    ? PurchaseRequest::query()
+                        ->where('customer_account_id', $user->id)
+                        ->where('status', 'pending')
+                        ->count()
+                    : 0,
                 'total_spend' => 0,
                 'reward_points' => 0,
             ],
-            'recent_orders' => [],
+            'recent_orders' => $recentOrders->map(fn (PurchaseRequest $order): array => [
+                'id' => $order->request_number,
+                'items' => count($order->items ?? []),
+                'date' => $order->created_at?->toDateString(),
+                'total' => (float) $order->grand_total,
+                'status' => match ($order->status) {
+                    'approved' => 'Approved',
+                    'rejected' => 'Rejected',
+                    default => 'Pending',
+                },
+            ]),
         ]);
     })->name('dashboard');
 
@@ -192,6 +217,7 @@ Route::prefix('buyer')->name('buyer.')->middleware('auth:customer')->group(funct
             ?: ErpSetting::query()->value('default_selling_price_list');
         $canViewPrice = (bool) $account->can_view_price;
         $customerRules = collect();
+        $approvedQuantities = collect();
 
         if ($customerId) {
             $customerRules = CustomerProductCatalog::query()
@@ -200,18 +226,38 @@ Route::prefix('buyer')->name('buyer.')->middleware('auth:customer')->group(funct
                 ->where('is_active', true)
                 ->whereHas('productCatalog', fn ($query) => $query->where('is_visible', true))
                 ->get();
+
+            if (Schema::hasTable('purchase_requests')) {
+                $approvedQuantities = PurchaseRequest::query()
+                    ->where('customer_id', $customerId)
+                    ->where('status', 'approved')
+                    ->whereDate('approved_at', now()->toDateString())
+                    ->get()
+                    ->flatMap(fn (PurchaseRequest $request) => $request->items ?? [])
+                    ->filter(fn (array $item): bool => !empty($item['item_code']))
+                    ->groupBy('item_code')
+                    ->map(fn ($items): float => (float) $items->sum(fn (array $item): float => (float) ($item['qty'] ?? 0)));
+            }
         }
 
         if ($customerRules->isNotEmpty()) {
             $products = $customerRules
-                ->map(function (CustomerProductCatalog $rule) use ($publicImageUrl, $erpItemPrice, $priceList, $canViewPrice) {
+                ->map(function (CustomerProductCatalog $rule) use ($publicImageUrl, $erpItemPrice, $priceList, $canViewPrice, $approvedQuantities) {
                     $catalog = $rule->productCatalog;
                     $item = $catalog->item;
+                    $dailyQuantity = (float) $rule->daily_quantity;
+                    $approvedQuantity = (float) $approvedQuantities->get($item?->item_code, 0);
+                    $remainingQuantity = max(0, $dailyQuantity - $approvedQuantity);
+                    $configuredMaximum = (float) ($rule->maximum_qty ?: $catalog->maximum_qty ?: $remainingQuantity);
+                    $maximumQuantity = $remainingQuantity > 0
+                        ? min($configuredMaximum > 0 ? $configuredMaximum : $remainingQuantity, $remainingQuantity)
+                        : 0;
 
                     $price = $item && $canViewPrice ? $erpItemPrice($item->item_code, $item->stock_uom, $priceList) : null;
 
                     return [
                         'id' => $catalog->id,
+                        'item_code' => $item?->item_code,
                         'name' => $catalog->display_name ?: $catalog->item_name,
                         'category' => $catalog->category?->name ?: $item?->item_group ?: 'Produk',
                         'grade' => $catalog->display_description ?: $item?->brand ?: 'Fresh',
@@ -219,12 +265,12 @@ Route::prefix('buyer')->name('buyer.')->middleware('auth:customer')->group(funct
                         'price' => $price,
                         'price_list' => $priceList,
                         'can_view_price' => $canViewPrice,
-                        'stock' => (float) $rule->daily_quantity,
-                        'stock_status' => ((float) $rule->daily_quantity) > 0 ? 'full' : 'empty',
+                        'stock' => $remainingQuantity,
+                        'stock_status' => $remainingQuantity > 0 ? 'full' : 'empty',
                         'image' => $publicImageUrl($catalog->display_image_url ?: $item?->image_url),
-                        'daily_quantity' => (float) $rule->daily_quantity,
+                        'daily_quantity' => $remainingQuantity,
                         'minimum_qty' => (float) ($rule->minimum_qty ?: $catalog->minimum_qty),
-                        'maximum_qty' => (float) ($rule->maximum_qty ?: $rule->daily_quantity ?: $catalog->maximum_qty),
+                        'maximum_qty' => $maximumQuantity,
                         'allocation_note' => $rule->note,
                     ];
                 })
@@ -255,6 +301,7 @@ Route::prefix('buyer')->name('buyer.')->middleware('auth:customer')->group(funct
 
                 return [
                     'id' => $item->id,
+                    'item_code' => $item->item_code,
                     'name' => $item->catalog->display_name ?: $item->item_name,
                     'category' => $item->catalog->category?->name ?: $item->item_group ?: 'Produk',
                     'grade' => $item->catalog->display_description ?: $item->brand ?: 'Fresh',
@@ -276,8 +323,8 @@ Route::prefix('buyer')->name('buyer.')->middleware('auth:customer')->group(funct
     })->name('catalog');
 
     Route::get('/cart', fn () => Inertia::render('Buyer/Cart', ['items' => []]))->name('cart');
-    Route::post('/cart/submit', fn () => redirect()->route('buyer.orders'))->name('cart.submit');
-    Route::get('/orders', fn () => Inertia::render('Buyer/Orders', ['orders' => []]))->name('orders');
+    Route::post('/cart/submit', [BuyerOrderController::class, 'store'])->name('cart.submit');
+    Route::get('/orders', [BuyerOrderController::class, 'index'])->name('orders');
 
     Route::get('/rewards', fn () => Inertia::render('Buyer/Rewards', [
         'points' => 0,

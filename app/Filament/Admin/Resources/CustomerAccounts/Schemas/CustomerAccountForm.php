@@ -3,6 +3,7 @@
 namespace App\Filament\Admin\Resources\CustomerAccounts\Schemas;
 
 use App\Models\ErpCustomer;
+use App\Models\User;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -54,6 +55,13 @@ class CustomerAccountForm
                 TextInput::make('customer_type_id')
                     ->hidden()
                     ->dehydrated(),
+                Select::make('sales_user_id')
+                    ->label('Sales Person')
+                    ->relationship('salesPerson', 'name')
+                    ->getOptionLabelFromRecordUsing(fn (User $record): string => "{$record->name} ({$record->email})")
+                    ->searchable(['name', 'email'])
+                    ->preload()
+                    ->helperText('Pilih user internal yang menjadi sales untuk customer account ini.'),
                 DateTimePicker::make('last_login_at'),
                 Toggle::make('is_active')
                     ->required()

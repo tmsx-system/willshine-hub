@@ -18,6 +18,7 @@ class CustomerAccount extends Authenticatable
         'password',
         'customer_name',
         'customer_type_id',
+        'sales_user_id',
         'is_active',
         'can_order',
         'can_view_price',
@@ -51,5 +52,15 @@ class CustomerAccount extends Authenticatable
     public function customerType()
     {
         return $this->belongsTo(CustomerType::class, 'customer_type_id');
+    }
+
+    public function salesPerson()
+    {
+        return $this->belongsTo(User::class, 'sales_user_id');
+    }
+
+    public function purchaseRequests()
+    {
+        return $this->hasMany(PurchaseRequest::class);
     }
 }

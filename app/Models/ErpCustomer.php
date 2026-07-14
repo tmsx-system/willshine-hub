@@ -34,4 +34,9 @@ class ErpCustomer extends Model
     {
         return $this->hasMany(CustomerProductCatalog::class, 'customer_id');
     }
+
+    public function purchaseRequests()
+    {
+        return $this->hasMany(PurchaseRequest::class, 'customer_id');
+    }
 }

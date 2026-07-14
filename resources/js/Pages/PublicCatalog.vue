@@ -1,8 +1,9 @@
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue';
 import { Link } from '@inertiajs/vue3';
-import { ChevronDown, Heart, Minus, PackageSearch, Plus, Search, ShoppingCart, SlidersHorizontal } from 'lucide-vue-next';
+import { Heart, Minus, PackageSearch, Plus, Search, ShoppingCart, SlidersHorizontal } from 'lucide-vue-next';
 import PublicLayout from '@/Layouts/PublicLayout.vue';
+import SelectMenu from '@/Components/UI/SelectMenu.vue';
 
 const props = defineProps({
     products: { type: Array, default: () => [] },
@@ -27,6 +28,7 @@ const selectedPackaging = ref('All');
 const selectedAvailability = ref('All');
 const selectedPromotion = ref('All');
 const likedProductIds = ref([]);
+const productQuantities = ref({});
 
 const uniqueOptions = (field) => computed(() => [
     'All',
@@ -41,10 +43,15 @@ const promotionOptions = computed(() => [
     'With offer',
     ...new Set(normalizedProducts.value.map(product => product.badge).filter(Boolean)),
 ]);
-const selectedGradeLabel = computed(() => `Grade: ${selectedGrade.value}`);
-const selectedPackagingLabel = computed(() => `Packaging: ${selectedPackaging.value}`);
-const selectedAvailabilityLabel = computed(() => `Availability: ${selectedAvailability.value}`);
-const selectedPromotionLabel = computed(() => `Promotion: ${selectedPromotion.value}`);
+const sortOptions = [
+    'Recommended',
+    'Newest',
+    'Name A-Z',
+    'Name Z-A',
+    'Price Low to High',
+    'Price High to Low',
+    'Most Popular',
+];
 
 const hasActiveFilters = computed(() => {
     return Boolean(search.value)
@@ -70,6 +77,28 @@ const toggleLike = (productId) => {
     likedProductIds.value = isLiked(productId)
         ? likedProductIds.value.filter(id => id !== productId)
         : [...likedProductIds.value, productId];
+};
+
+const quantityFor = (productId) => productQuantities.value[productId] || 1;
+
+const clampPublicQty = (value) => {
+    const parsed = Math.floor(Number(value));
+
+    return Math.max(1, Number.isFinite(parsed) && parsed > 0 ? parsed : 1);
+};
+
+const setProductQty = (productId, value) => {
+    productQuantities.value = {
+        ...productQuantities.value,
+        [productId]: clampPublicQty(value),
+    };
+};
+
+const updateProductQty = (productId, value) => {
+    productQuantities.value = {
+        ...productQuantities.value,
+        [productId]: value,
+    };
 };
 
 onMounted(() => {
@@ -138,22 +167,14 @@ const filteredProducts = computed(() => {
                             type="search"
                             placeholder="Search seeds, seedlings, fruits, categories, or item names"
                             class="h-12 w-full rounded-2xl border border-[#E5E7EB] bg-white pl-12 pr-4 text-sm font-medium text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#EC4899] focus:ring-4 focus:ring-[#FCE7F3]"
+                            style="padding-left: 3.5rem;"
                         />
                     </label>
-                    <label class="relative flex h-12 cursor-pointer items-center rounded-2xl border border-[#E5E7EB] bg-white px-4 pr-11 text-sm font-bold text-[#374151] transition hover:border-[#FBCFE8] hover:bg-[#FDF2F8] focus-within:border-[#EC4899] focus-within:ring-4 focus-within:ring-[#FCE7F3]">
-                        <span class="sr-only">Sort products</span>
-                        <span class="truncate">{{ sort }}</span>
-                        <select v-model="sort" class="absolute inset-0 z-10 h-full w-full cursor-pointer appearance-none opacity-0">
-                            <option>Recommended</option>
-                            <option>Newest</option>
-                            <option>Name A-Z</option>
-                            <option>Name Z-A</option>
-                            <option>Price Low to High</option>
-                            <option>Price High to Low</option>
-                            <option>Most Popular</option>
-                        </select>
-                        <ChevronDown class="pointer-events-none absolute right-4 top-1/2 z-20 h-4 w-4 -translate-y-1/2 text-[#374151]" />
-                    </label>
+                    <SelectMenu
+                        v-model="sort"
+                        label="Sort products"
+                        :options="sortOptions"
+                    />
                 </div>
 
                 <div class="mt-4 flex gap-2 overflow-x-auto pb-1">
@@ -174,42 +195,18 @@ const filteredProducts = computed(() => {
                 </div>
 
                 <div class="mt-4 grid gap-3 text-sm font-semibold text-[#6B7280] md:grid-cols-4">
-                    <label class="group relative flex min-h-14 cursor-pointer items-center gap-2 rounded-2xl border border-[#FBCFE8] px-4 py-3 pr-11 text-left transition hover:-translate-y-0.5 hover:bg-[#FDF2F8] hover:shadow-[0_12px_28px_rgba(236,72,153,.12)] focus-within:ring-4 focus-within:ring-[#FCE7F3]">
-                        <SlidersHorizontal class="pointer-events-none h-4 w-4 shrink-0 text-[#EC4899]" />
-                        <span class="pointer-events-none min-w-0 flex-1 truncate text-sm font-bold text-[#374151]">{{ selectedGradeLabel }}</span>
-                        <span class="sr-only">Filter grade</span>
-                        <select v-model="selectedGrade" class="absolute inset-0 z-10 h-full w-full cursor-pointer appearance-none opacity-0">
-                            <option v-for="option in gradeOptions" :key="option" :value="option">Grade: {{ option }}</option>
-                        </select>
-                        <ChevronDown class="pointer-events-none absolute right-4 top-1/2 z-20 h-4 w-4 -translate-y-1/2 text-[#BE185D]" />
-                    </label>
-                    <label class="group relative flex min-h-14 cursor-pointer items-center gap-2 rounded-2xl border border-[#FBCFE8] px-4 py-3 pr-11 text-left transition hover:-translate-y-0.5 hover:bg-[#FDF2F8] hover:shadow-[0_12px_28px_rgba(236,72,153,.12)] focus-within:ring-4 focus-within:ring-[#FCE7F3]">
-                        <SlidersHorizontal class="pointer-events-none h-4 w-4 shrink-0 text-[#EC4899]" />
-                        <span class="pointer-events-none min-w-0 flex-1 truncate text-sm font-bold text-[#374151]">{{ selectedPackagingLabel }}</span>
-                        <span class="sr-only">Filter packaging</span>
-                        <select v-model="selectedPackaging" class="absolute inset-0 z-10 h-full w-full cursor-pointer appearance-none opacity-0">
-                            <option v-for="option in packagingOptions" :key="option" :value="option">Packaging: {{ option }}</option>
-                        </select>
-                        <ChevronDown class="pointer-events-none absolute right-4 top-1/2 z-20 h-4 w-4 -translate-y-1/2 text-[#BE185D]" />
-                    </label>
-                    <label class="group relative flex min-h-14 cursor-pointer items-center gap-2 rounded-2xl border border-[#FBCFE8] px-4 py-3 pr-11 text-left transition hover:-translate-y-0.5 hover:bg-[#FDF2F8] hover:shadow-[0_12px_28px_rgba(236,72,153,.12)] focus-within:ring-4 focus-within:ring-[#FCE7F3]">
-                        <SlidersHorizontal class="pointer-events-none h-4 w-4 shrink-0 text-[#EC4899]" />
-                        <span class="pointer-events-none min-w-0 flex-1 truncate text-sm font-bold text-[#374151]">{{ selectedAvailabilityLabel }}</span>
-                        <span class="sr-only">Filter availability</span>
-                        <select v-model="selectedAvailability" class="absolute inset-0 z-10 h-full w-full cursor-pointer appearance-none opacity-0">
-                            <option v-for="option in availabilityOptions" :key="option" :value="option">Availability: {{ option }}</option>
-                        </select>
-                        <ChevronDown class="pointer-events-none absolute right-4 top-1/2 z-20 h-4 w-4 -translate-y-1/2 text-[#BE185D]" />
-                    </label>
-                    <label class="group relative flex min-h-14 cursor-pointer items-center gap-2 rounded-2xl border border-[#FBCFE8] px-4 py-3 pr-11 text-left transition hover:-translate-y-0.5 hover:bg-[#FDF2F8] hover:shadow-[0_12px_28px_rgba(236,72,153,.12)] focus-within:ring-4 focus-within:ring-[#FCE7F3]">
-                        <SlidersHorizontal class="pointer-events-none h-4 w-4 shrink-0 text-[#EC4899]" />
-                        <span class="pointer-events-none min-w-0 flex-1 truncate text-sm font-bold text-[#374151]">{{ selectedPromotionLabel }}</span>
-                        <span class="sr-only">Filter promotion</span>
-                        <select v-model="selectedPromotion" class="absolute inset-0 z-10 h-full w-full cursor-pointer appearance-none opacity-0">
-                            <option v-for="option in promotionOptions" :key="option" :value="option">Promotion: {{ option }}</option>
-                        </select>
-                        <ChevronDown class="pointer-events-none absolute right-4 top-1/2 z-20 h-4 w-4 -translate-y-1/2 text-[#BE185D]" />
-                    </label>
+                    <SelectMenu v-model="selectedGrade" label="Filter grade" prefix="Grade" :options="gradeOptions">
+                        <template #icon><SlidersHorizontal class="h-4 w-4 shrink-0 text-[#EC4899]" /></template>
+                    </SelectMenu>
+                    <SelectMenu v-model="selectedPackaging" label="Filter packaging" prefix="Packaging" :options="packagingOptions">
+                        <template #icon><SlidersHorizontal class="h-4 w-4 shrink-0 text-[#EC4899]" /></template>
+                    </SelectMenu>
+                    <SelectMenu v-model="selectedAvailability" label="Filter availability" prefix="Availability" :options="availabilityOptions">
+                        <template #icon><SlidersHorizontal class="h-4 w-4 shrink-0 text-[#EC4899]" /></template>
+                    </SelectMenu>
+                    <SelectMenu v-model="selectedPromotion" label="Filter promotion" prefix="Promotion" :options="promotionOptions">
+                        <template #icon><SlidersHorizontal class="h-4 w-4 shrink-0 text-[#EC4899]" /></template>
+                    </SelectMenu>
                 </div>
             </div>
 
@@ -263,9 +260,19 @@ const filteredProducts = computed(() => {
 
                         <div class="mt-5 grid grid-cols-[112px_1fr] gap-2">
                             <div class="flex min-h-11 items-center justify-between rounded-xl border border-[#E5E7EB] px-3 text-sm font-bold text-[#374151]">
-                                <button type="button" aria-label="Decrease quantity"><Minus class="h-4 w-4" /></button>
-                                <span>1</span>
-                                <button type="button" aria-label="Increase quantity"><Plus class="h-4 w-4" /></button>
+                                <button type="button" aria-label="Decrease quantity" @click="setProductQty(product.id, quantityFor(product.id) - 1)"><Minus class="h-4 w-4" /></button>
+                                <input
+                                    :value="quantityFor(product.id)"
+                                    type="number"
+                                    inputmode="numeric"
+                                    min="1"
+                                    class="h-9 w-12 bg-transparent text-center text-sm font-black text-[#374151] outline-none focus:text-[#BE185D]"
+                                    aria-label="Quantity"
+                                    @input="updateProductQty(product.id, $event.target.value)"
+                                    @blur="setProductQty(product.id, quantityFor(product.id))"
+                                    @keydown.enter.prevent="setProductQty(product.id, quantityFor(product.id))"
+                                />
+                                <button type="button" aria-label="Increase quantity" @click="setProductQty(product.id, quantityFor(product.id) + 1)"><Plus class="h-4 w-4" /></button>
                             </div>
                             <Link
                                 href="/login"

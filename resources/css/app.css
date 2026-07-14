@@ -414,6 +414,46 @@ body {
     box-shadow: 0 0 0 4px rgba(236, 72, 153, 0.08);
 }
 
+.input-field.input-field--leading-icon {
+    padding-left: 3.5rem;
+}
+
+.input-field.input-field--trailing-action {
+    padding-right: 3rem;
+}
+
+.input-icon-left {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    display: flex;
+    height: 1.25rem;
+    width: 1.25rem;
+    transform: translateY(-50%);
+    align-items: center;
+    justify-content: center;
+    color: #ec4899;
+    pointer-events: none;
+}
+
+.input-action-right {
+    position: absolute;
+    right: 0.875rem;
+    top: 50%;
+    display: flex;
+    height: 1.5rem;
+    width: 1.5rem;
+    transform: translateY(-50%);
+    align-items: center;
+    justify-content: center;
+    color: #9ca3af;
+    transition: color 0.2s ease;
+}
+
+.input-action-right:hover {
+    color: #6b7280;
+}
+
 /* ───────────────────────────────────────────
    Sidebar / Navigation
 ──────────────────────────────────────────── */

@@ -55,4 +55,9 @@ class User extends Authenticatable implements FilamentUser
             'is_active' => 'boolean',
         ];
     }
+
+    public function assignedCustomerAccounts()
+    {
+        return $this->hasMany(CustomerAccount::class, 'sales_user_id');
+    }
 }

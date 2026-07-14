@@ -30,8 +30,8 @@ function clearSearch() {
 <template>
     <div class="relative">
         <!-- Search icon -->
-        <div class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none">
-            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <div class="input-icon-left">
+            <svg class="h-4 w-4 text-current" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
             </svg>
         </div>
@@ -40,14 +40,16 @@ function clearSearch() {
             v-model="localValue"
             type="text"
             :placeholder="placeholder"
-            class="input-field pl-10 pr-10"
+            class="input-field input-field--leading-icon input-field--trailing-action"
+            style="padding-left: 3.5rem; padding-right: 3rem;"
         />
 
         <!-- Clear button -->
         <button
             v-if="localValue"
             @click="clearSearch"
-            class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 transition-colors"
+            class="input-action-right"
+            type="button"
         >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>

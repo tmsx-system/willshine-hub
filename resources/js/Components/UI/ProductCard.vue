@@ -39,19 +39,36 @@ const stockLabel = {
 function addToCart() {
     if (!canAddToCart.value) return;
 
+    normalizeQty();
     emit('add-to-cart', { product: props.product, qty: qty.value });
     added.value = true;
     setTimeout(() => { added.value = false; }, 1800);
 }
 
 function decreaseQty() {
-    qty.value = Math.max(minQty.value, qty.value - 1);
+    qty.value = clampQty(qty.value - 1);
 }
 
 function increaseQty() {
     if (!canIncrease.value) return;
 
-    qty.value += 1;
+    qty.value = clampQty(qty.value + 1);
+}
+
+function clampQty(value) {
+    const parsed = Math.floor(Number(value));
+    const fallback = Number.isFinite(parsed) && parsed > 0 ? parsed : minQty.value;
+    const minimum = Math.max(minQty.value, fallback);
+
+    return hasMaxQty.value ? Math.min(minimum, maxQty.value) : minimum;
+}
+
+function updateQty(event) {
+    qty.value = event.target.value;
+}
+
+function normalizeQty() {
+    qty.value = clampQty(qty.value);
 }
 
 function formatPrice(value) {
@@ -101,9 +118,8 @@ watch(() => props.product.id, () => {
             <p class="mt-1 text-xs text-gray-500">UOM: <span class="font-semibold text-gray-700">{{ product.uom }}</span></p>
 
             <div v-if="product.daily_quantity !== null && product.daily_quantity !== undefined" class="mt-3 rounded-xl border border-pink-100 bg-pink-50 px-3 py-2">
-                <p class="text-[11px] font-bold uppercase tracking-wide text-pink-700">Alokasi harian</p>
+                <p class="text-[11px] font-bold uppercase tracking-wide text-pink-700">Stok tersedia</p>
                 <p class="mt-0.5 text-sm font-extrabold text-gray-900">{{ product.daily_quantity }} {{ product.uom }}</p>
-                <p v-if="hasMaxQty" class="mt-0.5 text-[11px] text-gray-500">Maks. order: {{ maxQty }} {{ product.uom }}</p>
             </div>
             <p v-if="product.allocation_note" class="mt-2 text-xs text-gray-500 line-clamp-2">{{ product.allocation_note }}</p>
 
@@ -114,7 +130,18 @@ watch(() => props.product.id, () => {
                 <div v-if="product.stock_status !== 'empty'" class="mt-3 flex items-center gap-2">
                     <div class="flex items-center border border-gray-200 rounded-xl overflow-hidden">
                         <button type="button" @click="decreaseQty" class="px-2.5 py-1.5 text-gray-500 hover:bg-pink-50 hover:text-pink-700 transition-colors text-sm font-bold">-</button>
-                        <span class="px-3 text-sm font-semibold text-gray-800">{{ qty }}</span>
+                        <input
+                            :value="qty"
+                            type="number"
+                            inputmode="numeric"
+                            :min="minQty"
+                            :max="hasMaxQty ? maxQty : undefined"
+                            class="h-9 w-14 border-x border-gray-200 bg-white px-1 text-center text-sm font-semibold text-gray-800 outline-none focus:bg-pink-50 focus:text-pink-700"
+                            aria-label="Jumlah order"
+                            @input="updateQty"
+                            @blur="normalizeQty"
+                            @keydown.enter.prevent="normalizeQty"
+                        />
                         <button
                             type="button"
                             @click="increaseQty"

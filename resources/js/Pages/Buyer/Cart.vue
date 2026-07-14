@@ -41,7 +41,35 @@ const tax = computed(() => Math.round(subtotal.value * 0.11));
 const total = computed(() => subtotal.value + tax.value);
 
 function updateQty(item, delta) {
-    item.qty = Math.max(1, Number(item.qty || 1) + delta);
+    item.qty = clampQty(item, Number(item.qty || 1) + delta);
+}
+
+function maxQtyFor(item) {
+    const configuredMax = Number(item.maximum_qty || 0);
+    const dailyQty = Number(item.daily_quantity || 0);
+
+    if (configuredMax > 0 && dailyQty > 0) {
+        return Math.min(configuredMax, dailyQty);
+    }
+
+    return configuredMax > 0 ? configuredMax : dailyQty;
+}
+
+function clampQty(item, value) {
+    const parsed = Math.floor(Number(value));
+    const minimum = Number(item.minimum_qty || 1);
+    const maxQty = maxQtyFor(item);
+    const normalized = Math.max(minimum, Number.isFinite(parsed) && parsed > 0 ? parsed : minimum);
+
+    return maxQty > 0 ? Math.min(normalized, maxQty) : normalized;
+}
+
+function updateTypedQty(item, event) {
+    item.qty = event.target.value;
+}
+
+function normalizeTypedQty(item) {
+    item.qty = clampQty(item, item.qty);
 }
 
 function removeItem(id) {
@@ -134,7 +162,18 @@ function submitOrder() {
                     <div class="flex flex-col items-end gap-2">
                         <div class="flex items-center border border-gray-200 rounded-xl overflow-hidden">
                             <button @click="updateQty(item, -1)" class="px-3 py-2 text-gray-500 hover:bg-pink-50 hover:text-pink-700 transition-colors font-bold text-sm">-</button>
-                            <span class="px-4 py-2 text-sm font-bold text-gray-800 min-w-[2.5rem] text-center">{{ item.qty }}</span>
+                            <input
+                                :value="item.qty"
+                                type="number"
+                                inputmode="numeric"
+                                :min="item.minimum_qty || 1"
+                                :max="maxQtyFor(item) > 0 ? maxQtyFor(item) : undefined"
+                                class="h-10 w-20 border-x border-gray-200 bg-white px-2 text-center text-sm font-bold text-gray-800 outline-none focus:bg-pink-50 focus:text-pink-700"
+                                aria-label="Jumlah item"
+                                @input="updateTypedQty(item, $event)"
+                                @blur="normalizeTypedQty(item)"
+                                @keydown.enter.prevent="normalizeTypedQty(item)"
+                            />
                             <button @click="updateQty(item, 1)" class="px-3 py-2 text-gray-500 hover:bg-pink-50 hover:text-pink-700 transition-colors font-bold text-sm">+</button>
                         </div>
                         <p class="text-sm font-bold text-gray-800">{{ formatRupiah(item.price * item.qty) }}</p>

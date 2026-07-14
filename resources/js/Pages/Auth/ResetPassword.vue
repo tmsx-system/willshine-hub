@@ -48,7 +48,7 @@ function submit() {
                     <label for="email" class="mb-2 block text-sm font-bold text-[#374151]">Email</label>
                     <div class="relative">
                         <Mail class="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#EC4899]" />
-                        <input id="email" v-model="form.email" type="email" required autocomplete="email" class="h-14 w-full rounded-2xl border border-[#E5E7EB] bg-white pl-12 pr-4 text-[#111827] outline-none transition focus:border-[#EC4899] focus:ring-4 focus:ring-[#FCE7F3]" />
+                        <input id="email" v-model="form.email" type="email" required autocomplete="email" class="h-14 w-full rounded-2xl border border-[#E5E7EB] bg-white pl-12 pr-4 text-[#111827] outline-none transition focus:border-[#EC4899] focus:ring-4 focus:ring-[#FCE7F3]" style="padding-left: 3.5rem;" />
                     </div>
                 </div>
 
@@ -56,7 +56,7 @@ function submit() {
                     <label for="password" class="mb-2 block text-sm font-bold text-[#374151]">New password</label>
                     <div class="relative">
                         <LockKeyhole class="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#EC4899]" />
-                        <input id="password" v-model="form.password" :type="showPassword ? 'text' : 'password'" required autocomplete="new-password" class="h-14 w-full rounded-2xl border border-[#E5E7EB] bg-white pl-12 pr-12 text-[#111827] outline-none transition focus:border-[#EC4899] focus:ring-4 focus:ring-[#FCE7F3]" />
+                        <input id="password" v-model="form.password" :type="showPassword ? 'text' : 'password'" required autocomplete="new-password" class="h-14 w-full rounded-2xl border border-[#E5E7EB] bg-white pl-12 pr-12 text-[#111827] outline-none transition focus:border-[#EC4899] focus:ring-4 focus:ring-[#FCE7F3]" style="padding-left: 3.5rem; padding-right: 3.5rem;" />
                         <button type="button" class="absolute right-4 top-1/2 -translate-y-1/2 text-[#9CA3AF] transition hover:text-[#BE185D]" @click="showPassword = !showPassword">
                             <Eye class="h-5 w-5" />
                         </button>
@@ -67,7 +67,7 @@ function submit() {
                     <label for="password_confirmation" class="mb-2 block text-sm font-bold text-[#374151]">Confirm password</label>
                     <div class="relative">
                         <LockKeyhole class="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#EC4899]" />
-                        <input id="password_confirmation" v-model="form.password_confirmation" :type="showConfirmation ? 'text' : 'password'" required autocomplete="new-password" class="h-14 w-full rounded-2xl border border-[#E5E7EB] bg-white pl-12 pr-12 text-[#111827] outline-none transition focus:border-[#EC4899] focus:ring-4 focus:ring-[#FCE7F3]" />
+                        <input id="password_confirmation" v-model="form.password_confirmation" :type="showConfirmation ? 'text' : 'password'" required autocomplete="new-password" class="h-14 w-full rounded-2xl border border-[#E5E7EB] bg-white pl-12 pr-12 text-[#111827] outline-none transition focus:border-[#EC4899] focus:ring-4 focus:ring-[#FCE7F3]" style="padding-left: 3.5rem; padding-right: 3.5rem;" />
                         <button type="button" class="absolute right-4 top-1/2 -translate-y-1/2 text-[#9CA3AF] transition hover:text-[#BE185D]" @click="showConfirmation = !showConfirmation">
                             <Eye class="h-5 w-5" />
                         </button>

@@ -87,6 +87,7 @@ function submit() {
                                     required
                                     placeholder="name@example.com"
                                     class="h-14 w-full rounded-2xl border border-[#E5E7EB] bg-white pl-12 pr-4 text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#EC4899] focus:ring-4 focus:ring-[#FCE7F3]"
+                                    style="padding-left: 3.5rem;"
                                     :class="{ 'border-red-300': form.errors.email }"
                                 />
                             </div>
@@ -107,6 +108,7 @@ function submit() {
                                     required
                                     placeholder="Enter password"
                                     class="h-14 w-full rounded-2xl border border-[#E5E7EB] bg-white pl-12 pr-12 text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#EC4899] focus:ring-4 focus:ring-[#FCE7F3]"
+                                    style="padding-left: 3.5rem; padding-right: 3.5rem;"
                                     :class="{ 'border-red-300': form.errors.password }"
                                 />
                                 <button

@@ -57,11 +57,12 @@ function submit() {
                 <div>
                     <label class="mb-2 block text-sm font-bold text-gray-700">Nama Kontak</label>
                     <div class="relative">
-                        <UserRound class="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-pink-500" />
+                        <UserRound class="input-icon-left h-5 w-5" />
                         <input
                             v-model="form.name"
                             type="text"
-                            class="input-field pl-12"
+                            class="input-field input-field--leading-icon"
+                            style="padding-left: 3.5rem;"
                             :class="{ 'border-red-300': form.errors.name }"
                         />
                     </div>
@@ -71,11 +72,12 @@ function submit() {
                 <div>
                     <label class="mb-2 block text-sm font-bold text-gray-700">Email Login</label>
                     <div class="relative">
-                        <Mail class="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-pink-500" />
+                        <Mail class="input-icon-left h-5 w-5" />
                         <input
                             v-model="form.email"
                             type="email"
-                            class="input-field pl-12"
+                            class="input-field input-field--leading-icon"
+                            style="padding-left: 3.5rem;"
                             :class="{ 'border-red-300': form.errors.email }"
                         />
                     </div>
@@ -86,11 +88,12 @@ function submit() {
                     <div>
                         <label class="mb-2 block text-sm font-bold text-gray-700">Password Baru</label>
                         <div class="relative">
-                            <KeyRound class="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-pink-500" />
+                            <KeyRound class="input-icon-left h-5 w-5" />
                             <input
                                 v-model="form.password"
                                 type="password"
-                                class="input-field pl-12"
+                                class="input-field input-field--leading-icon"
+                                style="padding-left: 3.5rem;"
                                 placeholder="Kosongkan jika tidak diganti"
                                 :class="{ 'border-red-300': form.errors.password }"
                             />
@@ -101,11 +104,12 @@ function submit() {
                     <div>
                         <label class="mb-2 block text-sm font-bold text-gray-700">Konfirmasi Password</label>
                         <div class="relative">
-                            <ShieldCheck class="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-pink-500" />
+                            <ShieldCheck class="input-icon-left h-5 w-5" />
                             <input
                                 v-model="form.password_confirmation"
                                 type="password"
-                                class="input-field pl-12"
+                                class="input-field input-field--leading-icon"
+                                style="padding-left: 3.5rem;"
                                 placeholder="Ulangi password baru"
                             />
                         </div>
