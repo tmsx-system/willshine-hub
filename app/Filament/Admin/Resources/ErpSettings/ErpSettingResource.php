@@ -23,7 +23,7 @@ class ErpSettingResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCog6Tooth;
 
-    protected static \UnitEnum|string|null $navigationGroup = 'Sinkronisasi ERP';
+    // protected static \UnitEnum|string|null $navigationGroup = 'Sinkronisasi ERP';
 
     protected static ?int $navigationSort = 10;
 

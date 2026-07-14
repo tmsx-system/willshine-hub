@@ -19,7 +19,7 @@ class PurchaseRequestResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClipboardDocumentCheck;
 
-    protected static \UnitEnum|string|null $navigationGroup = 'Pesanan';
+    // protected static \UnitEnum|string|null $navigationGroup = 'Pesanan';
 
     protected static ?int $navigationSort = 21;
 
