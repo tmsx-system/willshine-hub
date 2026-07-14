@@ -23,15 +23,15 @@ class CustomerProductCatalogResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedAdjustmentsHorizontal;
 
-    protected static \UnitEnum|string|null $navigationGroup = 'Customers';
+    protected static \UnitEnum|string|null $navigationGroup = 'Pelanggan';
 
     protected static ?int $navigationSort = 22;
 
-    protected static ?string $navigationLabel = 'Customer Product Rules';
+    protected static ?string $navigationLabel = 'Aturan Produk Pelanggan';
 
-    protected static ?string $modelLabel = 'Customer Product Rule';
+    protected static ?string $modelLabel = 'Aturan Produk Pelanggan';
 
-    protected static ?string $pluralModelLabel = 'Customer Product Rules';
+    protected static ?string $pluralModelLabel = 'Aturan Produk Pelanggan';
 
     public static function form(Schema $schema): Schema
     {

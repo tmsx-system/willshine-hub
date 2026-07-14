@@ -18,31 +18,31 @@ class ListProductCategories extends ListRecords
     {
         return [
             Action::make('syncProductCategories')
-                ->label('Sync Item Groups')
+                ->label('Sinkron Grup Item')
                 ->icon('heroicon-o-arrow-path')
                 ->color('primary')
                 ->requiresConfirmation()
-                ->modalDescription('Fetch Item Group records from ERPNext and generate product categories?')
+                ->modalDescription('Ambil data Item Group dari ERPNext dan buat/update kategori produk?')
                 ->action(function (): void {
                     try {
                         app(ItemService::class)->syncProductCategories();
 
                         Notification::make()
-                            ->title('Product categories synchronized')
+                            ->title('Kategori produk berhasil disinkronkan')
                             ->success()
                             ->send();
                     } catch (Throwable $exception) {
                         report($exception);
 
                         Notification::make()
-                            ->title('Product category synchronization failed')
+                            ->title('Sinkron kategori produk gagal')
                             ->body($exception->getMessage())
                             ->danger()
                             ->persistent()
                             ->send();
                     }
                 }),
-            CreateAction::make(),
+            CreateAction::make()->label('Tambah Data'),
         ];
     }
 }

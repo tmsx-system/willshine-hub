@@ -16,34 +16,36 @@ class CustomerProductCatalogsTable
         return $table
             ->columns([
                 TextColumn::make('customer.customer_code')
-                    ->label('Customer Code')
+                    ->label('Kode Pelanggan')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('customer.customer_name')
-                    ->label('Customer')
+                    ->label('Pelanggan')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('productCatalog.item_code')
-                    ->label('Item Code')
+                    ->label('Kode Item')
                     ->searchable(),
                 TextColumn::make('productCatalog.display_name')
-                    ->label('Product')
+                    ->label('Produk')
                     ->searchable(),
                 TextColumn::make('daily_quantity')
-                    ->label('Daily Qty')
+                    ->label('Alokasi Harian')
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('minimum_qty')
-                    ->label('Min Qty')
+                    ->label('Min Order')
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('maximum_qty')
-                    ->label('Max Qty')
+                    ->label('Max Order')
                     ->numeric()
                     ->sortable(),
                 IconColumn::make('is_active')
+                    ->label('Aktif')
                     ->boolean(),
                 TextColumn::make('updated_at')
+                    ->label('Diubah')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -52,11 +54,11 @@ class CustomerProductCatalogsTable
                 //
             ])
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()->label('Ubah'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()->label('Hapus Terpilih'),
                 ]),
             ]);
     }

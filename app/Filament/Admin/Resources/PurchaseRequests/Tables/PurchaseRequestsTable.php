@@ -25,21 +25,26 @@ class PurchaseRequestsTable
             ->defaultSort('created_at', 'desc')
             ->columns([
                 TextColumn::make('request_number')
-                    ->label('Request')
+                    ->label('No. Pengajuan')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('customer.customer_code')
-                    ->label('Customer Code')
+                    ->label('Kode Pelanggan')
                     ->searchable(),
                 TextColumn::make('customer_name')
-                    ->label('Customer')
+                    ->label('Pelanggan')
                     ->searchable(),
                 TextColumn::make('customerAccount.salesPerson.name')
-                    ->label('Sales Person')
+                    ->label('Sales')
                     ->searchable(),
                 TextColumn::make('status')
                     ->badge()
-                    ->formatStateUsing(fn (string $state): string => ucfirst($state))
+                    ->label('Status')
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'approved' => 'Disetujui',
+                        'rejected' => 'Ditolak',
+                        default => 'Menunggu',
+                    })
                     ->color(fn (string $state): string => match ($state) {
                         'approved' => 'success',
                         'rejected' => 'danger',
@@ -47,88 +52,93 @@ class PurchaseRequestsTable
                     })
                     ->sortable(),
                 TextColumn::make('items')
-                    ->label('Items')
+                    ->label('Jumlah Item')
                     ->state(fn (PurchaseRequest $record): int => count($record->items ?? [])),
                 TextColumn::make('grand_total')
                     ->label('Total')
                     ->money('IDR')
                     ->sortable(),
                 TextColumn::make('price_list')
-                    ->label('Price List')
+                    ->label('Daftar Harga')
                     ->toggleable(),
                 TextColumn::make('erp_sales_order_id')
-                    ->label('ERP Sales Order')
+                    ->label('Sales Order ERP')
                     ->searchable()
                     ->toggleable(),
                 TextColumn::make('created_at')
-                    ->label('Requested At')
+                    ->label('Tanggal Pengajuan')
                     ->dateTime()
                     ->sortable(),
             ])
             ->filters([
                 SelectFilter::make('status')
                     ->options([
-                        'pending' => 'Pending',
-                        'approved' => 'Approved',
-                        'rejected' => 'Rejected',
+                        'pending' => 'Menunggu',
+                        'approved' => 'Disetujui',
+                        'rejected' => 'Ditolak',
                     ]),
             ])
             ->recordActions([
                 Action::make('viewItems')
-                    ->label('Items')
+                    ->label('Lihat Item')
                     ->icon(Heroicon::OutlinedListBullet)
                     ->color('gray')
                     ->modalHeading(fn (PurchaseRequest $record): string => $record->request_number)
                     ->modalWidth('4xl')
                     ->modalSubmitAction(false)
-                    ->modalCancelActionLabel('Close')
+                    ->modalCancelActionLabel('Tutup')
                     ->schema([
-                        Section::make('Request Summary')
+                        Section::make('Ringkasan Pengajuan')
                             ->columns(3)
                             ->schema([
                                 TextEntry::make('customer_name')
-                                    ->label('Customer'),
+                                    ->label('Pelanggan'),
                                 TextEntry::make('customerAccount.salesPerson.name')
-                                    ->label('Sales Person')
+                                    ->label('Sales')
                                     ->placeholder('-'),
                                 TextEntry::make('status')
                                     ->badge()
-                                    ->formatStateUsing(fn (string $state): string => ucfirst($state))
+                                    ->label('Status')
+                                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                                        'approved' => 'Disetujui',
+                                        'rejected' => 'Ditolak',
+                                        default => 'Menunggu',
+                                    })
                                     ->color(fn (string $state): string => match ($state) {
                                         'approved' => 'success',
                                         'rejected' => 'danger',
                                         default => 'warning',
                                     }),
                                 TextEntry::make('price_list')
-                                    ->label('Price List')
+                                    ->label('Daftar Harga')
                                     ->placeholder('-'),
                                 TextEntry::make('payment_method')
-                                    ->label('Payment')
+                                    ->label('Pembayaran')
                                     ->placeholder('-'),
                                 TextEntry::make('grand_total')
-                                    ->label('Grand Total')
+                                    ->label('Total Akhir')
                                     ->money('IDR'),
                                 TextEntry::make('notes')
-                                    ->label('Notes')
+                                    ->label('Catatan')
                                     ->placeholder('-')
                                     ->columnSpanFull(),
                                 TextEntry::make('erp_error')
-                                    ->label('ERP Error')
+                                    ->label('Error ERP')
                                     ->placeholder('-')
                                     ->color('danger')
                                     ->columnSpanFull(),
                             ]),
-                        Section::make('Requested Items')
+                        Section::make('Item yang Diajukan')
                             ->schema([
                                 RepeatableEntry::make('items')
                                     ->hiddenLabel()
                                     ->columns(6)
                                     ->schema([
                                         TextEntry::make('item_code')
-                                            ->label('Item Code')
+                                            ->label('Kode Item')
                                             ->weight('bold'),
                                         TextEntry::make('name')
-                                            ->label('Product')
+                                            ->label('Produk')
                                             ->columnSpan(2),
                                         TextEntry::make('qty')
                                             ->label('Qty')
@@ -137,21 +147,21 @@ class PurchaseRequestsTable
                                             ->label('UOM')
                                             ->placeholder('-'),
                                         TextEntry::make('price')
-                                            ->label('Rate')
+                                            ->label('Harga')
                                             ->money('IDR'),
                                         TextEntry::make('line_total')
-                                            ->label('Line Total')
+                                            ->label('Subtotal')
                                             ->money('IDR')
                                             ->weight('bold'),
                                     ]),
                             ]),
                     ]),
                 Action::make('approve')
-                    ->label('Approve')
+                    ->label('Setujui')
                     ->icon(Heroicon::OutlinedCheckCircle)
                     ->color('success')
                     ->requiresConfirmation()
-                    ->modalDescription('Approve this buyer request and create a Sales Order in ERPNext?')
+                    ->modalDescription('Setujui pengajuan buyer ini dan buat Sales Order di ERPNext?')
                     ->visible(fn (PurchaseRequest $record): bool => $record->status === 'pending')
                     ->action(function (PurchaseRequest $record): void {
                         try {
@@ -169,8 +179,8 @@ class PurchaseRequestsTable
                             app(RewardService::class)->earnFromPurchaseRequest($record->refresh());
 
                             Notification::make()
-                                ->title('Request approved')
-                                ->body("Sales Order {$salesOrderId} created in ERPNext.")
+                                ->title('Pengajuan disetujui')
+                                ->body("Sales Order {$salesOrderId} berhasil dibuat di ERPNext.")
                                 ->success()
                                 ->send();
                         } catch (Throwable $exception) {
@@ -179,7 +189,7 @@ class PurchaseRequestsTable
                             $record->update(['erp_error' => $exception->getMessage()]);
 
                             Notification::make()
-                                ->title('Approval failed')
+                                ->title('Approval gagal')
                                 ->body($exception->getMessage())
                                 ->danger()
                                 ->persistent()
@@ -187,12 +197,12 @@ class PurchaseRequestsTable
                         }
                     }),
                 Action::make('reject')
-                    ->label('Reject')
+                    ->label('Tolak')
                     ->icon(Heroicon::OutlinedXCircle)
                     ->color('danger')
                     ->schema([
                         Textarea::make('rejection_note')
-                            ->label('Reject reason')
+                            ->label('Alasan penolakan')
                             ->rows(3),
                     ])
                     ->visible(fn (PurchaseRequest $record): bool => $record->status === 'pending')
@@ -205,7 +215,7 @@ class PurchaseRequestsTable
                         ]);
 
                         Notification::make()
-                            ->title('Request rejected')
+                            ->title('Pengajuan ditolak')
                             ->success()
                             ->send();
                     }),

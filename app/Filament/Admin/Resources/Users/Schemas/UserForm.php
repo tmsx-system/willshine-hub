@@ -14,20 +14,25 @@ class UserForm
         return $schema
             ->components([
                 TextInput::make('name')
+                    ->label('Nama')
                     ->required(),
                 TextInput::make('email')
-                    ->label('Email address')
+                    ->label('Email Login')
                     ->email()
                     ->required(),
-                DateTimePicker::make('email_verified_at'),
+                DateTimePicker::make('email_verified_at')
+                    ->label('Email Terverifikasi Pada'),
                 TextInput::make('password')
+                    ->label('Password')
                     ->password()
                     ->required(fn (string $operation): bool => $operation === 'create')
                     ->dehydrated(fn (?string $state): bool => filled($state))
                     ->helperText('Kosongkan saat edit jika tidak ingin mengganti password.'),
                 Toggle::make('is_active')
+                    ->label('Akun Aktif')
                     ->required(),
-                DateTimePicker::make('last_login_at'),
+                DateTimePicker::make('last_login_at')
+                    ->label('Login Terakhir'),
             ]);
     }
 }

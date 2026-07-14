@@ -14,7 +14,7 @@ class ErpSettingForm
     {
         return $schema
             ->components([
-                Section::make('ERP Connection')
+                Section::make('Koneksi ERP')
                     ->columns(2)
                     ->schema([
                         TextInput::make('erp_site_url')
@@ -33,35 +33,35 @@ class ErpSettingForm
                             ->revealable()
                             ->required(),
                     ]),
-                Section::make('Selling Defaults')
+                Section::make('Pengaturan Default Penjualan')
                     ->columns(2)
                     ->schema([
                         TextInput::make('default_company')
                             ->label('Default Company'),
                         TextInput::make('default_selling_price_list')
-                            ->label('Default Selling Price List'),
+                            ->label('Price List Penjualan Default'),
                         TextInput::make('default_warehouse')
-                            ->label('Default Warehouse'),
+                            ->label('Default Gudang'),
                         TextInput::make('default_so_naming_series')
-                            ->label('Default Sales Order Naming Series'),
+                            ->label('Default Nomor Sales Order'),
                     ]),
-                Section::make('Sync Status')
+                Section::make('Status Sinkronisasi')
                     ->columns(2)
                     ->schema([
                         DateTimePicker::make('last_sync_customer')
-                            ->label('Last Customer Sync')
+                            ->label('Sinkron Pelanggan Terakhir')
                             ->disabled(),
                         DateTimePicker::make('last_sync_item')
-                            ->label('Last Item Sync')
+                            ->label('Sinkron Item Terakhir')
                             ->disabled(),
                         DateTimePicker::make('last_sync_stock')
-                            ->label('Last Stock Sync')
+                            ->label('Sinkron Stok Terakhir')
                             ->disabled(),
                         DateTimePicker::make('last_sync_price')
-                            ->label('Last Price Sync')
+                            ->label('Sinkron Harga Terakhir')
                             ->disabled(),
                         Toggle::make('enable_auto_sync')
-                            ->label('Enable Auto Sync')
+                            ->label('Aktifkan Auto Sinkron')
                             ->required(),
                     ])
                     ->columnSpan('full'),

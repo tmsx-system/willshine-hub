@@ -16,42 +16,46 @@ class RewardForm
     {
         return $schema
             ->components([
-                Section::make('Reward')
+                Section::make('Data Reward')
                     ->columns(2)
                     ->schema([
                         TextInput::make('name')
+                            ->label('Nama Reward')
                             ->required()
                             ->maxLength(255),
                         Select::make('category')
+                            ->label('Kategori')
                             ->required()
                             ->options([
-                                'Discount' => 'Discount',
-                                'Shipping' => 'Shipping',
-                                'Gift' => 'Gift',
+                                'Discount' => 'Diskon',
+                                'Shipping' => 'Gratis/Ongkir',
+                                'Gift' => 'Hadiah',
                                 'Cashback' => 'Cashback',
-                                'Service' => 'Service',
+                                'Service' => 'Layanan',
                             ])
                             ->default('Discount'),
                         TextInput::make('points_required')
-                            ->label('Points Required')
+                            ->label('Poin Dibutuhkan')
                             ->required()
                             ->numeric()
                             ->minValue(1),
                         DatePicker::make('valid_until')
-                            ->label('Valid Until'),
+                            ->label('Berlaku Sampai'),
                         Textarea::make('description')
+                            ->label('Deskripsi')
                             ->rows(3)
                             ->columnSpanFull(),
                     ])
                     ->columnSpanFull(),
-                Section::make('Display')
+                Section::make('Tampilan')
                     ->columns(2)
                     ->schema([
                         TextInput::make('display_order')
+                            ->label('Urutan Tampil')
                             ->numeric()
                             ->default(0),
                         Toggle::make('is_active')
-                            ->label('Active')
+                            ->label('Aktif')
                             ->default(true)
                             ->required(),
                     ])

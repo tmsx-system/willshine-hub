@@ -23,15 +23,15 @@ class CustomerAccountResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUserCircle;
 
-    protected static \UnitEnum|string|null $navigationGroup = 'Customers';
+    protected static \UnitEnum|string|null $navigationGroup = 'Pelanggan';
 
     protected static ?int $navigationSort = 24;
 
-    protected static ?string $navigationLabel = 'Customer Accounts';
+    protected static ?string $navigationLabel = 'Akun Login Pelanggan';
 
-    protected static ?string $modelLabel = 'Customer Account';
+    protected static ?string $modelLabel = 'Akun Login Pelanggan';
 
-    protected static ?string $pluralModelLabel = 'Customer Accounts';
+    protected static ?string $pluralModelLabel = 'Akun Login Pelanggan';
 
     public static function form(Schema $schema): Schema
     {

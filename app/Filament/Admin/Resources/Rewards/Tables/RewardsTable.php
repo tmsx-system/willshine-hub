@@ -18,44 +18,51 @@ class RewardsTable
             ->defaultSort('display_order')
             ->columns([
                 TextColumn::make('name')
+                    ->label('Nama Reward')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('category')
+                    ->label('Kategori')
                     ->badge()
                     ->sortable(),
                 TextColumn::make('points_required')
-                    ->label('Points')
+                    ->label('Poin')
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('valid_until')
+                    ->label('Berlaku Sampai')
                     ->date()
                     ->sortable(),
                 TextColumn::make('display_order')
+                    ->label('Urutan')
                     ->numeric()
                     ->sortable(),
                 IconColumn::make('is_active')
+                    ->label('Aktif')
                     ->boolean(),
                 TextColumn::make('updated_at')
+                    ->label('Diubah')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 SelectFilter::make('category')
+                    ->label('Kategori')
                     ->options([
-                        'Discount' => 'Discount',
-                        'Shipping' => 'Shipping',
-                        'Gift' => 'Gift',
+                        'Discount' => 'Diskon',
+                        'Shipping' => 'Gratis/Ongkir',
+                        'Gift' => 'Hadiah',
                         'Cashback' => 'Cashback',
-                        'Service' => 'Service',
+                        'Service' => 'Layanan',
                     ]),
             ])
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()->label('Ubah'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()->label('Hapus Terpilih'),
                 ]),
             ]);
     }

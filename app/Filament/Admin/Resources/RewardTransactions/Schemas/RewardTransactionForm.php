@@ -16,30 +16,34 @@ class RewardTransactionForm
     {
         return $schema
             ->components([
-                Section::make('Manual Point Adjustment')
+                Section::make('Penyesuaian Poin Manual')
                     ->columns(2)
                     ->schema([
                         Select::make('customer_account_id')
-                            ->label('Customer Account')
+                            ->label('Akun Pelanggan')
                             ->relationship('customerAccount', 'customer_name')
                             ->getOptionLabelFromRecordUsing(fn (CustomerAccount $record): string => "{$record->customer_name} ({$record->email})")
                             ->searchable(['customer_name', 'email'])
                             ->preload()
                             ->required(),
                         Select::make('type')
+                            ->label('Tipe Transaksi')
                             ->required()
                             ->options([
-                                'adjustment' => 'Adjustment',
+                                'adjustment' => 'Penyesuaian',
                                 'bonus' => 'Bonus',
                             ])
                             ->default('adjustment'),
                         TextInput::make('points')
+                            ->label('Poin')
                             ->helperText('Gunakan nilai positif untuk tambah poin, negatif untuk koreksi pengurangan.')
                             ->required()
                             ->integer(),
                         TextInput::make('reference')
+                            ->label('Referensi')
                             ->maxLength(255),
                         Textarea::make('description')
+                            ->label('Keterangan')
                             ->required()
                             ->rows(3)
                             ->columnSpanFull(),

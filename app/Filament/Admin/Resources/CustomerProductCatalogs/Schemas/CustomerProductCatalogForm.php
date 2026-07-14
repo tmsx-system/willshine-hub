@@ -17,46 +17,46 @@ class CustomerProductCatalogForm
     {
         return $schema
             ->components([
-                Section::make('Customer Product Access')
+                Section::make('Akses Produk Pelanggan')
                     ->columns(2)
                     ->schema([
                         Select::make('customer_id')
-                            ->label('Customer')
+                            ->label('Pelanggan')
                             ->relationship('customer', 'customer_name')
                             ->getOptionLabelFromRecordUsing(fn (ErpCustomer $record): string => "{$record->customer_code} - {$record->customer_name}")
                             ->searchable(['customer_code', 'customer_name'])
                             ->preload()
                             ->required(),
                         Select::make('product_catalog_id')
-                            ->label('Product Catalog')
+                            ->label('Katalog Produk')
                             ->relationship('productCatalog', 'display_name')
                             ->getOptionLabelFromRecordUsing(fn (ProductCatalog $record): string => ($record->item_code ?: $record->item?->item_code ?: 'CAT-' . $record->id) . ' - ' . ($record->display_name ?: $record->item_name))
                             ->searchable(['item_code', 'item_name', 'display_name'])
                             ->preload()
                             ->required(),
                         TextInput::make('daily_quantity')
-                            ->label('Daily Quantity')
+                            ->label('Alokasi Harian')
                             ->required()
                             ->numeric()
                             ->minValue(0)
                             ->default(0)
                             ->helperText('Qty maksimal yang dialokasikan untuk customer ini per hari.'),
                         TextInput::make('minimum_qty')
-                            ->label('Minimum Order Qty')
+                            ->label('Minimal Order')
                             ->numeric()
                             ->minValue(0)
                             ->helperText('Kosongkan untuk mengikuti minimum qty katalog.'),
                         TextInput::make('maximum_qty')
-                            ->label('Maximum Order Qty')
+                            ->label('Maksimal Order')
                             ->numeric()
                             ->minValue(0)
                             ->helperText('Kosongkan untuk mengikuti maksimum qty katalog atau daily quantity.'),
                         Toggle::make('is_active')
-                            ->label('Active')
+                            ->label('Aktif')
                             ->required()
                             ->default(true),
                         Textarea::make('note')
-                            ->label('Internal Note')
+                            ->label('Catatan Internal')
                             ->columnSpanFull(),
                     ])
                     ->ColumnSpanFull(),

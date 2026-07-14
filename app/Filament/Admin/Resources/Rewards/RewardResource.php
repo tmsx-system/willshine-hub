@@ -23,15 +23,15 @@ class RewardResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedGift;
 
-    protected static \UnitEnum|string|null $navigationGroup = 'Rewards';
+    protected static \UnitEnum|string|null $navigationGroup = 'Reward';
 
     protected static ?int $navigationSort = 10;
 
-    protected static ?string $navigationLabel = 'Reward Catalog';
+    protected static ?string $navigationLabel = 'Katalog Reward';
 
     protected static ?string $modelLabel = 'Reward';
 
-    protected static ?string $pluralModelLabel = 'Reward Catalog';
+    protected static ?string $pluralModelLabel = 'Katalog Reward';
 
     public static function form(Schema $schema): Schema
     {

@@ -18,19 +18,22 @@ class CustomerAccountForm
         return $schema
             ->components([
                 TextInput::make('name')
+                    ->label('Nama Kontak')
                     ->required(),
                 TextInput::make('email')
-                    ->label('Email address')
+                    ->label('Email Login')
                     ->email()
                     ->required(),
-                DateTimePicker::make('email_verified_at'),
+                DateTimePicker::make('email_verified_at')
+                    ->label('Email Terverifikasi Pada'),
                 TextInput::make('password')
+                    ->label('Password')
                     ->password()
                     ->required(fn (string $operation): bool => $operation === 'create')
                     ->dehydrated(fn (?string $state): bool => filled($state))
                     ->helperText('Kosongkan saat edit jika tidak ingin mengganti password.'),
                 Select::make('customer_id')
-                    ->label('Customer')
+                    ->label('Pelanggan ERP')
                     ->relationship('customer', 'customer_name')
                     ->getOptionLabelFromRecordUsing(fn (ErpCustomer $record): string => "{$record->customer_code} - {$record->customer_name}")
                     ->searchable(['customer_code', 'customer_name'])
@@ -45,10 +48,11 @@ class CustomerAccountForm
                         $set('customer_type_name', $customer?->customerType?->name);
                     }),
                 TextInput::make('customer_name')
+                    ->label('Nama Pelanggan')
                     ->disabled()
                     ->dehydrated(),
                 TextInput::make('customer_type_name')
-                    ->label('Customer Type')
+                    ->label('Tipe Pelanggan')
                     ->disabled()
                     ->dehydrated(false)
                     ->formatStateUsing(fn ($state, $record) => $record?->customerType?->name),
@@ -56,23 +60,28 @@ class CustomerAccountForm
                     ->hidden()
                     ->dehydrated(),
                 Select::make('sales_user_id')
-                    ->label('Sales Person')
+                    ->label('Sales Penanggung Jawab')
                     ->relationship('salesPerson', 'name')
                     ->getOptionLabelFromRecordUsing(fn (User $record): string => "{$record->name} ({$record->email})")
                     ->searchable(['name', 'email'])
                     ->preload()
-                    ->helperText('Pilih user internal yang menjadi sales untuk customer account ini.'),
-                DateTimePicker::make('last_login_at'),
+                    ->helperText('Pilih user internal yang menjadi sales untuk akun pelanggan ini.'),
+                DateTimePicker::make('last_login_at')
+                    ->label('Login Terakhir'),
                 Toggle::make('is_active')
+                    ->label('Akun Aktif')
                     ->required()
                     ->default(true),
                 Toggle::make('can_order')
+                    ->label('Boleh Order')
                     ->required()
                     ->default(true),
                 Toggle::make('can_view_price')
+                    ->label('Boleh Lihat Harga')
                     ->required()
                     ->default(true),
                 Toggle::make('can_view_reward')
+                    ->label('Boleh Lihat Reward')
                     ->required()
                     ->default(true),
             ]);

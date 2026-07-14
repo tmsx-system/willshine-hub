@@ -18,30 +18,30 @@ class EditErpSetting extends EditRecord
     {
         return [
             Action::make('testConnection')
-                ->label('Test Connection')
+                ->label('Tes Koneksi')
                 ->color('gray')
                 ->action(function (): void {
                     try {
                         $user = app(FrappeClient::class)->testConnection();
 
                         Notification::make()
-                            ->title('ERP connection successful')
-                            ->body("Authenticated as {$user}.")
+                            ->title('Koneksi ERP berhasil')
+                            ->body("Berhasil login sebagai {$user}.")
                             ->success()
                             ->send();
                     } catch (Throwable $exception) {
-                        $this->notifyFailure('Connection failed', $exception);
+                        $this->notifyFailure('Koneksi gagal', $exception);
                     }
                 }),
             Action::make('syncItems')
-                ->label('Sync Items')
+                ->label('Sinkron Item')
                 ->color('primary')
                 ->url(fn (): string => route('admin.erp-settings.sync', [
                     'record' => $this->record->getKey(),
                     'type' => 'items',
                 ])),
             Action::make('syncProductCategories')
-                ->label('Sync Item Groups')
+                ->label('Sinkron Grup Item')
                 ->icon('heroicon-o-tag')
                 ->color('primary')
                 ->url(fn (): string => route('admin.erp-settings.sync', [
@@ -49,7 +49,7 @@ class EditErpSetting extends EditRecord
                     'type' => 'item-groups',
                 ])),
             Action::make('syncCustomerTypes')
-                ->label('Sync Customer Types')
+                ->label('Sinkron Tipe Pelanggan')
                 ->icon('heroicon-o-identification')
                 ->color('primary')
                 ->url(fn (): string => route('admin.erp-settings.sync', [
@@ -57,21 +57,21 @@ class EditErpSetting extends EditRecord
                     'type' => 'customer-types',
                 ])),
             Action::make('syncCustomers')
-                ->label('Sync Customers')
+                ->label('Sinkron Pelanggan')
                 ->color('primary')
                 ->url(fn (): string => route('admin.erp-settings.sync', [
                     'record' => $this->record->getKey(),
                     'type' => 'customers',
                 ])),
             Action::make('syncPrices')
-                ->label('Sync Prices')
+                ->label('Sinkron Harga')
                 ->icon('heroicon-o-currency-dollar')
                 ->color('primary')
                 ->url(fn (): string => route('admin.erp-settings.sync', [
                     'record' => $this->record->getKey(),
                     'type' => 'prices',
                 ])),
-            DeleteAction::make(),
+            DeleteAction::make()->label('Hapus'),
         ];
     }
 

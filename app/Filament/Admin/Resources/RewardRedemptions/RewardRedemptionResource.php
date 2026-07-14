@@ -19,15 +19,15 @@ class RewardRedemptionResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedTicket;
 
-    protected static \UnitEnum|string|null $navigationGroup = 'Rewards';
+    protected static \UnitEnum|string|null $navigationGroup = 'Reward';
 
     protected static ?int $navigationSort = 20;
 
-    protected static ?string $navigationLabel = 'Reward Redemptions';
+    protected static ?string $navigationLabel = 'Pengajuan Tukar Reward';
 
-    protected static ?string $modelLabel = 'Reward Redemption';
+    protected static ?string $modelLabel = 'Pengajuan Tukar Reward';
 
-    protected static ?string $pluralModelLabel = 'Reward Redemptions';
+    protected static ?string $pluralModelLabel = 'Pengajuan Tukar Reward';
 
     public static function table(Table $table): Table
     {
@@ -59,7 +59,7 @@ class RewardRedemptionResource extends Resource
 
     public static function getNavigationBadgeTooltip(): ?string
     {
-        return 'Pending reward redemptions';
+        return 'Pengajuan tukar reward yang masih menunggu approval';
     }
 
     public static function getEloquentQuery(): Builder

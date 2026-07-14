@@ -18,7 +18,7 @@ class ListCustomerTypes extends ListRecords
     {
         return [
             Action::make('syncCustomerTypes')
-                ->label('Sync Customer Types')
+                ->label('Sinkron Tipe Pelanggan')
                 ->icon('heroicon-o-arrow-path')
                 ->color('primary')
                 ->action(function (): void {
@@ -26,21 +26,21 @@ class ListCustomerTypes extends ListRecords
                         app(CustomerService::class)->syncCustomerTypes();
 
                         Notification::make()
-                            ->title('Customer types synchronized')
+                            ->title('Tipe pelanggan berhasil disinkronkan')
                             ->success()
                             ->send();
                     } catch (Throwable $exception) {
                         report($exception);
 
                         Notification::make()
-                            ->title('Customer type synchronization failed')
+                            ->title('Sinkron tipe pelanggan gagal')
                             ->body($exception->getMessage())
                             ->danger()
                             ->persistent()
                             ->send();
                     }
                 }),
-            CreateAction::make(),
+            CreateAction::make()->label('Tambah Data'),
         ];
     }
 }

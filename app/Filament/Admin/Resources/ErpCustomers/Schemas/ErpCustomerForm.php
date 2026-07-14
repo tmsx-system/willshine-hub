@@ -15,50 +15,51 @@ class ErpCustomerForm
     {
         return $schema
             ->components([
-                Section::make('Customer Identity')
+                Section::make('Identitas Pelanggan')
                     ->columns(2)
                     ->schema([
                         TextInput::make('erp_customer_id')
                             ->label('ERP Customer ID')
                             ->required(),
                         TextInput::make('customer_code')
-                            ->label('Customer Code'),
+                            ->label('Kode Pelanggan'),
                         TextInput::make('customer_name')
-                            ->label('Customer Name')
+                            ->label('Nama Pelanggan')
                             ->required(),
                         Select::make('customer_type_id')
-                            ->label('Customer Type')
+                            ->label('Tipe Pelanggan')
                             ->relationship('customerType', 'name')
                             ->searchable()
                             ->preload(),
                     ])
                       ->columnSpan('full'),
-                Section::make('ERP Profile')
+                Section::make('Profil ERP')
                     ->columns(2)
                     ->schema([
                         TextInput::make('customer_group')
-                            ->label('Customer Group'),
-                        TextInput::make('territory'),
+                            ->label('Grup Pelanggan'),
+                        TextInput::make('territory')
+                            ->label('Area/Territory'),
                         TextInput::make('default_price_list')
-                            ->label('Default Price List'),
+                            ->label('Price List Default'),
                         TextInput::make('default_warehouse')
-                            ->label('Default Warehouse'),
+                            ->label('Default Gudang'),
                         TextInput::make('credit_limit')
-                            ->label('Credit Limit')
+                            ->label('Limit Kredit')
                             ->required()
                             ->numeric()
                             ->default(0.0),
                         Toggle::make('disabled')
-                            ->label('Disabled')
+                            ->label('Nonaktif di ERP')
                             ->required(),
                     ]),
-                Section::make('Sync Metadata')
+                Section::make('Info Sinkronisasi')
                     ->columns(2)
                     ->schema([
                         DateTimePicker::make('erp_modified_at')
-                            ->label('ERP Modified At'),
+                            ->label('Diubah di ERP Pada'),
                         DateTimePicker::make('last_synced_at')
-                            ->label('Last Synced At'),
+                            ->label('Sinkron Terakhir'),
                     ]),
             ]);
     }

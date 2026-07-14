@@ -19,15 +19,15 @@ class RewardTransactionResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCircleStack;
 
-    protected static \UnitEnum|string|null $navigationGroup = 'Rewards';
+    protected static \UnitEnum|string|null $navigationGroup = 'Reward';
 
     protected static ?int $navigationSort = 30;
 
-    protected static ?string $navigationLabel = 'Reward Point Ledger';
+    protected static ?string $navigationLabel = 'Riwayat Poin Reward';
 
-    protected static ?string $modelLabel = 'Reward Point Transaction';
+    protected static ?string $modelLabel = 'Transaksi Poin Reward';
 
-    protected static ?string $pluralModelLabel = 'Reward Point Ledger';
+    protected static ?string $pluralModelLabel = 'Riwayat Poin Reward';
 
     public static function form(Schema $schema): Schema
     {

@@ -21,25 +21,30 @@ class RewardRedemptionsTable
             ->defaultSort('created_at', 'desc')
             ->columns([
                 TextColumn::make('redemption_number')
-                    ->label('Redemption')
+                    ->label('No. Pengajuan')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('customerAccount.customer_name')
-                    ->label('Customer')
+                    ->label('Pelanggan')
                     ->searchable(),
                 TextColumn::make('customerAccount.salesPerson.name')
-                    ->label('Sales Person')
+                    ->label('Sales')
                     ->searchable(),
                 TextColumn::make('reward.name')
                     ->label('Reward')
                     ->searchable(),
                 TextColumn::make('points_spent')
-                    ->label('Points')
+                    ->label('Poin')
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('status')
                     ->badge()
-                    ->formatStateUsing(fn (string $state): string => ucfirst($state))
+                    ->label('Status')
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'approved' => 'Disetujui',
+                        'rejected' => 'Ditolak',
+                        default => 'Menunggu',
+                    })
                     ->color(fn (string $state): string => match ($state) {
                         'approved' => 'success',
                         'rejected' => 'danger',
@@ -47,42 +52,42 @@ class RewardRedemptionsTable
                     })
                     ->sortable(),
                 TextColumn::make('processedBy.name')
-                    ->label('Processed By')
+                    ->label('Diproses Oleh')
                     ->toggleable(),
                 TextColumn::make('created_at')
-                    ->label('Requested At')
+                    ->label('Tanggal Pengajuan')
                     ->dateTime()
                     ->sortable(),
             ])
             ->filters([
                 SelectFilter::make('status')
                     ->options([
-                        'pending' => 'Pending',
-                        'approved' => 'Approved',
-                        'rejected' => 'Rejected',
+                        'pending' => 'Menunggu',
+                        'approved' => 'Disetujui',
+                        'rejected' => 'Ditolak',
                     ]),
             ])
             ->recordActions([
                 Action::make('approve')
-                    ->label('Approve')
+                    ->label('Setujui')
                     ->icon(Heroicon::OutlinedCheckCircle)
                     ->color('success')
                     ->requiresConfirmation()
-                    ->modalDescription('Approve this reward redemption and deduct customer points?')
+                    ->modalDescription('Setujui penukaran reward ini dan kurangi poin pelanggan?')
                     ->visible(fn (RewardRedemption $record): bool => $record->status === 'pending')
                     ->action(function (RewardRedemption $record): void {
                         try {
                             app(RewardService::class)->approveRedemption($record, auth()->id());
 
                             Notification::make()
-                                ->title('Reward redemption approved')
+                                ->title('Penukaran reward disetujui')
                                 ->success()
                                 ->send();
                         } catch (Throwable $exception) {
                             report($exception);
 
                             Notification::make()
-                                ->title('Approval failed')
+                                ->title('Approval gagal')
                                 ->body($exception->getMessage())
                                 ->danger()
                                 ->persistent()
@@ -90,12 +95,12 @@ class RewardRedemptionsTable
                         }
                     }),
                 Action::make('reject')
-                    ->label('Reject')
+                    ->label('Tolak')
                     ->icon(Heroicon::OutlinedXCircle)
                     ->color('danger')
                     ->schema([
                         Textarea::make('rejection_note')
-                            ->label('Reject reason')
+                            ->label('Alasan penolakan')
                             ->rows(3),
                     ])
                     ->visible(fn (RewardRedemption $record): bool => $record->status === 'pending')
@@ -108,7 +113,7 @@ class RewardRedemptionsTable
                         ]);
 
                         Notification::make()
-                            ->title('Reward redemption rejected')
+                            ->title('Penukaran reward ditolak')
                             ->success()
                             ->send();
                     }),

@@ -20,42 +20,54 @@ class ProductCatalogsTable
                     ->label('ERP Item')
                     ->sortable(),
                 TextColumn::make('item_code')
-                    ->label('Catalog Code')
+                    ->label('Kode Katalog')
                     ->searchable(),
                 TextColumn::make('item_name')
-                    ->label('Catalog Item Name')
+                    ->label('Nama Item Katalog')
                     ->searchable(),
                 TextColumn::make('category.name')
-                    ->label('Category')
+                    ->label('Kategori')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('display_name')
+                    ->label('Nama Tampil')
                     ->searchable(),
-                ImageColumn::make('display_image_url'),
+                ImageColumn::make('display_image_url')
+                    ->label('Gambar'),
                 IconColumn::make('is_visible')
+                    ->label('Tampil')
                     ->boolean(),
                 IconColumn::make('is_featured')
+                    ->label('Unggulan')
                     ->boolean(),
                 TextColumn::make('display_order')
+                    ->label('Urutan')
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('minimum_qty')
+                    ->label('Min Qty')
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('maximum_qty')
+                    ->label('Max Qty')
                     ->numeric()
                     ->sortable(),
                 IconColumn::make('allow_decimal_qty')
+                    ->label('Qty Desimal')
                     ->boolean(),
                 IconColumn::make('show_stock')
+                    ->label('Tampilkan Stok')
                     ->boolean(),
                 IconColumn::make('show_price')
+                    ->label('Tampilkan Harga')
                     ->boolean(),
                 TextColumn::make('created_at')
+                    ->label('Dibuat')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
+                    ->label('Diubah')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -64,11 +76,11 @@ class ProductCatalogsTable
                 //
             ])
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()->label('Ubah'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()->label('Hapus Terpilih'),
                 ]),
             ]);
     }

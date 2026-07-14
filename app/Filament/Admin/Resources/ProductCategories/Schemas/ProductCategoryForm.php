@@ -15,31 +15,34 @@ class ProductCategoryForm
     {
         return $schema
             ->components([
-                Section::make('Category')
+                Section::make('Kategori')
                     ->columns(2)
                     ->schema([
                         TextInput::make('name')
+                            ->label('Nama Kategori')
                             ->required(),
                         TextInput::make('slug')
+                            ->label('Slug')
                             ->required(),
                         Textarea::make('description')
+                            ->label('Deskripsi')
                             ->columnSpanFull(),
                         FileUpload::make('image_url')
-                            ->label('Image')
+                            ->label('Gambar')
                             ->image()
                             ->columnSpanFull(),
                     ])
                     ->columnSpanFull(),
-                Section::make('Display')
+                Section::make('Tampilan')
                     ->columns(2)
                     ->schema([
                         TextInput::make('display_order')
-                            ->label('Display Order')
+                            ->label('Urutan Tampil')
                             ->required()
                             ->numeric()
                             ->default(0),
                         Toggle::make('is_active')
-                            ->label('Active')
+                            ->label('Aktif')
                             ->required(),
                     ])
                     ->columnSpanFull(),

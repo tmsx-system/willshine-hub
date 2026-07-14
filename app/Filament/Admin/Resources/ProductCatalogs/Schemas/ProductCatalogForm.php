@@ -19,7 +19,7 @@ class ProductCatalogForm
     {
         return $schema
             ->components([
-                Section::make('ERP Item')
+                Section::make('Item ERP')
                     ->columns(2)
                     ->schema([
                         Select::make('item_id')
@@ -40,33 +40,33 @@ class ProductCatalogForm
                                 $set('display_image_url', $item?->image_url);
                             }),
                         Select::make('category_id')
-                            ->label('Product Category')
+                            ->label('Kategori Produk')
                             ->relationship('category', 'name')
                             ->searchable()
                             ->preload(),
                         TextInput::make('item_code')
-                            ->label('Item Code')
+                            ->label('Kode Item')
                             ->disabled()
                             ->dehydrated(),
                         TextInput::make('item_name')
-                            ->label('Item Name')
+                            ->label('Nama Item')
                             ->disabled()
                             ->dehydrated(),
                     ])
                     ->columnSpanFull(),
 
-                Section::make('Catalog Display')
+                Section::make('Tampilan Katalog')
                     ->columns(2)
                     ->schema([
                         TextInput::make('display_name')
-                            ->label('Display Name'),
+                            ->label('Nama Tampil'),
                         TextInput::make('display_order')
-                            ->label('Display Order')
+                            ->label('Urutan Tampil')
                             ->required()
                             ->numeric()
                             ->default(0),
                         Textarea::make('display_description')
-                            ->label('Display Description')
+                            ->label('Deskripsi Tampil')
                             ->columnSpanFull(),
                         // FileUpload::make('display_image_url')
                         //     ->label('Display Image')
@@ -106,32 +106,32 @@ class ProductCatalogForm
                         //     }),
                     ]),
 
-                Section::make('Buyer Rules')
+                Section::make('Aturan Buyer')
                     ->columns(2)
                     ->schema([
 
                         TextInput::make('minimum_qty')
-                            ->label('Minimum Qty')
+                            ->label('Minimal Qty')
                             ->required()
                             ->numeric()
                             ->default(1),
                         TextInput::make('maximum_qty')
-                            ->label('Maximum Qty')
+                            ->label('Maksimal Qty')
                             ->numeric(),
                         Toggle::make('is_visible')
-                            ->label('Visible')
+                            ->label('Tampil di Buyer')
                             ->required(),
                         Toggle::make('is_featured')
-                            ->label('Featured')
+                            ->label('Produk Unggulan')
                             ->required(),
                         Toggle::make('allow_decimal_qty')
-                            ->label('Allow Decimal Qty')
+                            ->label('Boleh Qty Desimal')
                             ->required(),
                         Toggle::make('show_stock')
-                            ->label('Show Stock')
+                            ->label('Tampilkan Stok')
                             ->required(),
                         Toggle::make('show_price')
-                            ->label('Show Price')
+                            ->label('Tampilkan Harga')
                             ->required(),
                     ]),
             ]);

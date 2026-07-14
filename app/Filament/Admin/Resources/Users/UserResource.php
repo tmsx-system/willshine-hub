@@ -21,15 +21,15 @@ class UserResource extends Resource
 
     protected static ?string $model = User::class;
 
-    protected static ?string $navigationLabel = 'Admin';
+    protected static ?string $navigationLabel = 'Tim Internal';
     
-    protected static ?string $modelLabel = 'Admin';
+    protected static ?string $modelLabel = 'User Internal';
 
-    protected static ?string $pluralModelLabel = 'Admin';
+    protected static ?string $pluralModelLabel = 'Tim Internal';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUsers;
 
-    // protected static \UnitEnum|string|null $navigationGroup = 'Team';
+    protected static \UnitEnum|string|null $navigationGroup = 'Tim';
 
     protected static ?int $navigationSort = 30;
 

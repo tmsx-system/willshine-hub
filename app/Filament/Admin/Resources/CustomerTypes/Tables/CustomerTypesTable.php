@@ -16,30 +16,41 @@ class CustomerTypesTable
         return $table
             ->columns([
                 TextColumn::make('name')
+                    ->label('Nama Tipe')
                     ->searchable(),
                 TextColumn::make('code')
+                    ->label('Kode')
                     ->searchable(),
                 TextColumn::make('default_price_list')
+                    ->label('Price List Default')
                     ->searchable(),
                 TextColumn::make('default_warehouse')
+                    ->label('Gudang')
                     ->searchable(),
                 TextColumn::make('minimum_order_amount')
+                    ->label('Minimal Nilai')
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('minimum_order_qty')
+                    ->label('Minimal Qty')
                     ->numeric()
                     ->sortable(),
                 IconColumn::make('allow_reward')
+                    ->label('Reward')
                     ->boolean(),
                 IconColumn::make('allow_promo')
+                    ->label('Promo')
                     ->boolean(),
                 IconColumn::make('is_active')
+                    ->label('Aktif')
                     ->boolean(),
                 TextColumn::make('created_at')
+                    ->label('Dibuat')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
+                    ->label('Diubah')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -48,11 +59,11 @@ class CustomerTypesTable
                 //
             ])
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()->label('Ubah'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()->label('Hapus Terpilih'),
                 ]),
             ]);
     }

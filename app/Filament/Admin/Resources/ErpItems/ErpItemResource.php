@@ -23,15 +23,15 @@ class ErpItemResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCube;
 
-    protected static \UnitEnum|string|null $navigationGroup = 'Products';
+    protected static \UnitEnum|string|null $navigationGroup = 'Produk';
 
     protected static ?int $navigationSort = 20;
 
-    protected static ?string $navigationLabel = 'ERP Items';
+    protected static ?string $navigationLabel = 'Item ERP';
 
-    protected static ?string $modelLabel = 'ERP Item';
+    protected static ?string $modelLabel = 'Item ERP';
 
-    protected static ?string $pluralModelLabel = 'ERP Items';
+    protected static ?string $pluralModelLabel = 'Item ERP';
 
     public static function form(Schema $schema): Schema
     {

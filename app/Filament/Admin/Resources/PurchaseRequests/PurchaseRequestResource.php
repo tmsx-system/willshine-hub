@@ -19,15 +19,15 @@ class PurchaseRequestResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClipboardDocumentCheck;
 
-    // protected static \UnitEnum|string|null $navigationGroup = 'Customers';
+    protected static \UnitEnum|string|null $navigationGroup = 'Pesanan';
 
     protected static ?int $navigationSort = 21;
 
-    protected static ?string $navigationLabel = 'Buyer Order Requests';
+    protected static ?string $navigationLabel = 'Pengajuan Pesanan Buyer';
 
-    protected static ?string $modelLabel = 'Buyer Order Request';
+    protected static ?string $modelLabel = 'Pengajuan Pesanan Buyer';
 
-    protected static ?string $pluralModelLabel = 'Buyer Order Requests';
+    protected static ?string $pluralModelLabel = 'Pengajuan Pesanan Buyer';
 
     public static function table(Table $table): Table
     {
@@ -59,7 +59,7 @@ class PurchaseRequestResource extends Resource
 
     public static function getNavigationBadgeTooltip(): ?string
     {
-        return 'Pending buyer order requests';
+        return 'Pengajuan pesanan buyer yang masih menunggu approval';
     }
 
     public static function getEloquentQuery(): Builder

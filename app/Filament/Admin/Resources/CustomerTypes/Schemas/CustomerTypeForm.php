@@ -14,45 +14,48 @@ class CustomerTypeForm
     {
         return $schema
             ->components([
-                Section::make('Customer Type')
+                Section::make('Tipe Pelanggan')
                     ->columns(2)
                     ->schema([
                         TextInput::make('name')
+                            ->label('Nama Tipe')
                             ->required(),
                         TextInput::make('code')
+                            ->label('Kode')
                             ->required(),
                         Textarea::make('description')
+                            ->label('Deskripsi')
                             ->columnSpanFull(),
                     ]),
-                Section::make('Order Defaults')
+                Section::make('Pengaturan Default Order')
                     ->columns(2)
                     ->schema([
                         TextInput::make('default_price_list')
-                            ->label('Default Price List'),
+                            ->label('Price List Default'),
                         TextInput::make('default_warehouse')
-                            ->label('Default Warehouse'),
+                            ->label('Default Gudang'),
                         TextInput::make('minimum_order_amount')
-                            ->label('Minimum Order Amount')
+                            ->label('Minimal Nilai Order')
                             ->required()
                             ->numeric()
                             ->default(0.0),
                         TextInput::make('minimum_order_qty')
-                            ->label('Minimum Order Qty')
+                            ->label('Minimal Qty Order')
                             ->required()
                             ->numeric()
                             ->default(0),
                     ]),
-                Section::make('Rules')
+                Section::make('Aturan')
                     ->columns(3)
                     ->schema([
                         Toggle::make('allow_reward')
-                            ->label('Allow Reward')
+                            ->label('Boleh Reward')
                             ->required(),
                         Toggle::make('allow_promo')
-                            ->label('Allow Promo')
+                            ->label('Boleh Promo')
                             ->required(),
                         Toggle::make('is_active')
-                            ->label('Active')
+                            ->label('Aktif')
                             ->required(),
                     ])
                     ->columnSpan('full'),

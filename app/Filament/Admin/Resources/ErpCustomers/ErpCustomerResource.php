@@ -23,15 +23,15 @@ class ErpCustomerResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUserGroup;
 
-    protected static \UnitEnum|string|null $navigationGroup = 'Customers';
+    protected static \UnitEnum|string|null $navigationGroup = 'Pelanggan';
 
     protected static ?int $navigationSort = 20;
 
-    protected static ?string $navigationLabel = 'ERP Customers';
+    protected static ?string $navigationLabel = 'Data Pelanggan ERP';
 
-    protected static ?string $modelLabel = 'ERP Customer';
+    protected static ?string $modelLabel = 'Pelanggan ERP';
 
-    protected static ?string $pluralModelLabel = 'ERP Customers';
+    protected static ?string $pluralModelLabel = 'Data Pelanggan ERP';
 
     public static function form(Schema $schema): Schema
     {

@@ -15,62 +15,64 @@ class ErpItemForm
     {
         return $schema
             ->components([
-                Section::make('Item Identity')
+                Section::make('Identitas Item')
                     ->columns(2)
                     ->schema([
                         TextInput::make('erp_item_id')
                             ->label('ERP Item ID')
                             ->required(),
                         TextInput::make('item_code')
-                            ->label('Item Code')
+                            ->label('Kode Item')
                             ->required(),
                         TextInput::make('item_name')
-                            ->label('Item Name')
+                            ->label('Nama Item')
                             ->required(),
                         TextInput::make('item_group')
-                            ->label('Item Group'),
+                            ->label('Grup Item'),
                         TextInput::make('stock_uom')
-                            ->label('Stock UOM'),
-                        TextInput::make('brand'),
+                            ->label('UOM Stok'),
+                        TextInput::make('brand')
+                            ->label('Brand'),
                         TextInput::make('company')
                             ->label('Company')
                             ->disabled()
                             ->dehydrated(),
                     ]),
-                Section::make('Content')
+                Section::make('Konten')
                     ->columns(2)
                     ->schema([
                         Textarea::make('description')
+                            ->label('Deskripsi')
                             ->columnSpanFull(),
                         TextInput::make('image_url')
-                            ->label('ERP Image URL')
+                            ->label('URL Gambar ERP')
                             ->disabled()
                             ->dehydrated()
-                            ->helperText('Sumber gambar dari ERP. Upload gambar frontend dilakukan satu tempat saja di Product Catalog > Display Image.'),
+                            ->helperText('Sumber gambar dari ERP. Upload gambar frontend dilakukan satu tempat saja di Katalog Produk.'),
                     ]),
-                Section::make('Inventory Flags')
+                Section::make('Status Inventory')
                     ->columns(2)
                     ->schema([
                         Toggle::make('is_stock_item')
-                            ->label('Stock Item')
+                            ->label('Item Stok')
                             ->required(),
                         Toggle::make('disabled')
-                            ->label('Disabled')
+                            ->label('Nonaktif')
                             ->required(),
                         Toggle::make('has_batch_no')
-                            ->label('Has Batch No')
+                            ->label('Pakai Batch No')
                             ->required(),
                         Toggle::make('has_serial_no')
-                            ->label('Has Serial No')
+                            ->label('Pakai Serial No')
                             ->required(),
                     ]),
-                Section::make('Sync Metadata')
+                Section::make('Info Sinkronisasi')
                     ->columns(2)
                     ->schema([
                         DateTimePicker::make('erp_modified_at')
-                            ->label('ERP Modified At'),
+                            ->label('Diubah di ERP Pada'),
                         DateTimePicker::make('last_synced_at')
-                            ->label('Last Synced At'),
+                            ->label('Sinkron Terakhir'),
                     ]),
             ]);
     }
