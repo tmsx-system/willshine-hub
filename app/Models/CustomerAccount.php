@@ -63,4 +63,14 @@ class CustomerAccount extends Authenticatable
     {
         return $this->hasMany(PurchaseRequest::class);
     }
+
+    public function rewardTransactions()
+    {
+        return $this->hasMany(RewardTransaction::class);
+    }
+
+    public function rewardRedemptions()
+    {
+        return $this->hasMany(RewardRedemption::class);
+    }
 }

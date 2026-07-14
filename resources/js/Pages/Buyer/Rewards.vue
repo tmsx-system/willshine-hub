@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from 'vue';
+import { router } from '@inertiajs/vue3';
 import BuyerLayout from '@/Layouts/BuyerLayout.vue';
 import {
     ArrowUp,
@@ -24,11 +25,12 @@ const props = defineProps({
     next_points: { type: Number, required: true },
     rewards: { type: Array, required: true },
     history: { type: Array, required: true },
+    pending_redemptions: { type: Array, default: () => [] },
 });
 
 const activeTab = ref('rewards');
 const redeemingId = ref(null);
-const redeemedIds = ref([]);
+const redeemedIds = ref([...props.pending_redemptions]);
 
 const tierMilestones = [
     { name: 'Bronze', points: 0, icon: Medal },
@@ -67,9 +69,14 @@ function canRedeem(reward) {
 async function redeem(reward) {
     if (!canRedeem(reward)) return;
     redeemingId.value = reward.id;
-    await new Promise(resolve => setTimeout(resolve, 1200));
-    redeemedIds.value.push(reward.id);
-    redeemingId.value = null;
+
+    router.post('/buyer/rewards/redeem', {
+        reward_id: reward.id,
+    }, {
+        preserveScroll: true,
+        onSuccess: () => redeemedIds.value.push(reward.id),
+        onFinish: () => redeemingId.value = null,
+    });
 }
 
 function formatDate(date) {
@@ -182,12 +189,14 @@ function formatDate(date) {
                         <Star class="w-3.5 h-3.5 text-pink-500 fill-current" />
                         <span class="text-sm font-bold text-pink-700">{{ reward.points.toLocaleString('id-ID') }} poin</span>
                     </div>
-                    <p class="text-xs text-gray-400 mt-1">Berlaku s/d {{ new Date(reward.valid).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) }}</p>
+                    <p class="text-xs text-gray-400 mt-1">
+                        {{ reward.valid ? `Berlaku s/d ${new Date(reward.valid).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}` : 'Berlaku selama reward aktif' }}
+                    </p>
                 </div>
 
                 <div class="mt-auto">
-                    <div v-if="redeemedIds.includes(reward.id)" class="w-full py-2.5 rounded-xl bg-emerald-100 text-emerald-700 text-sm font-bold text-center">
-                        Berhasil Ditukar
+                    <div v-if="redeemedIds.includes(reward.id)" class="w-full py-2.5 rounded-xl bg-amber-100 text-amber-700 text-sm font-bold text-center">
+                        Menunggu Approval
                     </div>
                     <button
                         v-else

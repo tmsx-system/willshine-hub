@@ -4,6 +4,7 @@ namespace App\Filament\Admin\Resources\PurchaseRequests\Tables;
 
 use App\Models\PurchaseRequest;
 use App\Services\ERP\SalesOrderService;
+use App\Services\RewardService;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Textarea;
 use Filament\Infolists\Components\RepeatableEntry;
@@ -164,6 +165,8 @@ class PurchaseRequestsTable
                                 'erp_sales_order_id' => $salesOrderId,
                                 'erp_error' => null,
                             ]);
+
+                            app(RewardService::class)->earnFromPurchaseRequest($record->refresh());
 
                             Notification::make()
                                 ->title('Request approved')

@@ -3,12 +3,15 @@
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Admin\ErpSettingSyncController;
 use App\Http\Controllers\Buyer\BuyerOrderController;
+use App\Http\Controllers\Buyer\BuyerRewardController;
 use App\Models\CustomerProductCatalog;
 use App\Models\ErpItemPrice;
 use App\Models\ErpSetting;
 use App\Models\ErpItem;
 use App\Models\ProductCategory;
 use App\Models\PurchaseRequest;
+use App\Models\Reward;
+use App\Services\RewardService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
@@ -129,8 +132,26 @@ Route::get('/promotions', fn () => Inertia::render('Landing', [
 ]))
     ->name('public.promotions');
 
-Route::get('/rewards', fn () => Inertia::render('PublicRewards', ['rewards' => []]))
-    ->name('public.rewards');
+Route::get('/rewards', function () {
+    $rewards = Schema::hasTable('rewards')
+        ? Reward::query()
+            ->where('is_active', true)
+            ->where(function ($query) {
+                $query->whereNull('valid_until')->orWhere('valid_until', '>=', now()->toDateString());
+            })
+            ->orderBy('display_order')
+            ->orderBy('points_required')
+            ->get()
+            ->map(fn (Reward $reward): array => [
+                'id' => $reward->id,
+                'name' => $reward->name,
+                'points' => $reward->points_required . ' pts',
+                'desc' => $reward->description,
+            ])
+        : [];
+
+    return Inertia::render('PublicRewards', ['rewards' => $rewards]);
+})->name('public.rewards');
 
 Route::redirect('/public-rewards', '/rewards');
 
@@ -192,7 +213,9 @@ Route::prefix('buyer')->name('buyer.')->middleware('auth:customer')->group(funct
                         ->count()
                     : 0,
                 'total_spend' => 0,
-                'reward_points' => 0,
+                'reward_points' => Schema::hasTable('reward_transactions')
+                    ? app(RewardService::class)->balance($user)
+                    : 0,
             ],
             'recent_orders' => $recentOrders->map(fn (PurchaseRequest $order): array => [
                 'id' => $order->request_number,
@@ -326,14 +349,8 @@ Route::prefix('buyer')->name('buyer.')->middleware('auth:customer')->group(funct
     Route::post('/cart/submit', [BuyerOrderController::class, 'store'])->name('cart.submit');
     Route::get('/orders', [BuyerOrderController::class, 'index'])->name('orders');
 
-    Route::get('/rewards', fn () => Inertia::render('Buyer/Rewards', [
-        'points' => 0,
-        'tier' => 'Bronze',
-        'next_tier' => 'Silver',
-        'next_points' => 500,
-        'rewards' => [],
-        'history' => [],
-    ]))->name('rewards');
+    Route::get('/rewards', [BuyerRewardController::class, 'index'])->name('rewards');
+    Route::post('/rewards/redeem', [BuyerRewardController::class, 'redeem'])->name('rewards.redeem');
 
     Route::get('/settings', function (Request $request) {
         $user = $request->user('customer');
