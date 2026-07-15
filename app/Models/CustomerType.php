@@ -19,4 +19,9 @@ class CustomerType extends Model
     {
         return $this->hasMany(ErpCustomer::class);
     }
+
+    public function discounts()
+    {
+        return $this->hasMany(Discount::class);
+    }
 }

@@ -30,4 +30,9 @@ class ProductCatalog extends Model
     {
         return $this->hasMany(CustomerProductCatalog::class, 'product_catalog_id');
     }
+
+    public function discounts()
+    {
+        return $this->hasMany(Discount::class);
+    }
 }

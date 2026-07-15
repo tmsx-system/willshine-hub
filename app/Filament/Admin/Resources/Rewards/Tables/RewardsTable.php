@@ -66,7 +66,6 @@ class RewardsTable
                     ->trueLabel('Aktif')
                     ->falseLabel('Nonaktif'),
                 self::dateRangeFilter('valid_until', 'Tanggal Berlaku'),
-                self::dateRangeFilter('updated_at', 'Tanggal Diubah'),
             ], layout: FiltersLayout::AboveContent)
             ->recordActions([
                 EditAction::make()->label('Ubah'),

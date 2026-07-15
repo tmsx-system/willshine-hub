@@ -62,7 +62,6 @@ class CustomerAccountsTable
                     ->label('Boleh Lihat Reward')
                     ->trueLabel('Ya')
                     ->falseLabel('Tidak'),
-                self::dateRangeFilter('last_login_at', 'Login Terakhir'),
                 self::dateRangeFilter('created_at', 'Tanggal Dibuat'),
             ], layout: FiltersLayout::AboveContent)
             ->recordActions([

@@ -102,9 +102,7 @@ class ErpSettingsTable
                     ->label('Auto Sinkron')
                     ->trueLabel('Aktif')
                     ->falseLabel('Nonaktif'),
-                self::dateRangeFilter('last_sync_customer', 'Tanggal Sinkron Pelanggan'),
                 self::dateRangeFilter('last_sync_item', 'Tanggal Sinkron Item'),
-                self::dateRangeFilter('last_sync_price', 'Tanggal Sinkron Harga'),
             ], layout: FiltersLayout::AboveContent)
             ->recordActions([
                 ActionGroup::make([

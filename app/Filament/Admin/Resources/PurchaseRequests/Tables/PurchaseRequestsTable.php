@@ -101,7 +101,6 @@ class PurchaseRequestsTable
                         ->when($data['value'] ?? null, fn (Builder $query, string $value): Builder => $query
                             ->whereHas('customerAccount', fn (Builder $query): Builder => $query->where('sales_user_id', $value)))),
                 self::dateRangeFilter('created_at', 'Tanggal Pengajuan'),
-                self::dateRangeFilter('approved_at', 'Tanggal Disetujui'),
             ], layout: FiltersLayout::AboveContent)
             ->recordActions([
                 Action::make('viewItems')

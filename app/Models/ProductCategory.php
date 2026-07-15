@@ -16,4 +16,9 @@ class ProductCategory extends Model
     {
         return $this->hasMany(ProductCatalog::class, 'category_id');
     }
+
+    public function discounts()
+    {
+        return $this->hasMany(Discount::class);
+    }
 }

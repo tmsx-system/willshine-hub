@@ -14,11 +14,13 @@ trait HasDateRangeFilters
     ): Filter {
         return Filter::make($column . '_range')
             ->label($label)
+            ->columns(2)
+            ->columnSpan(2)
             ->schema([
                 DatePicker::make('from')
-                    ->label('Dari Tanggal'),
+                    ->label("Dari {$label}"),
                 DatePicker::make('until')
-                    ->label('Sampai Tanggal'),
+                    ->label("Sampai {$label}"),
             ])
             ->query(fn (Builder $query, array $data): Builder => $query
                 ->when($data['from'] ?? null, fn (Builder $query, string $date): Builder => $query->whereDate($column, '>=', $date))
