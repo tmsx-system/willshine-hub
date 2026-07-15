@@ -27,11 +27,11 @@ class ErpItemResource extends Resource
 
     protected static ?int $navigationSort = 20;
 
-    protected static ?string $navigationLabel = 'Item ERP';
+    protected static ?string $navigationLabel = 'Item';
 
-    protected static ?string $modelLabel = 'Item ERP';
+    protected static ?string $modelLabel = 'Item';
 
-    protected static ?string $pluralModelLabel = 'Item ERP';
+    protected static ?string $pluralModelLabel = 'Item';
 
     public static function form(Schema $schema): Schema
     {

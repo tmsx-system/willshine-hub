@@ -19,7 +19,7 @@ class ProductCatalogForm
     {
         return $schema
             ->components([
-                Section::make('Item ERP')
+                Section::make('Item')
                     ->columns(2)
                     ->schema([
                         Select::make('item_id')

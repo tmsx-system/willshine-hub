@@ -85,7 +85,7 @@ class ProductCatalogsTable
                     ->searchable()
                     ->preload(),
                 SelectFilter::make('item_group')
-                    ->label('Grup Item ERP')
+                    ->label('Grup Item')
                     ->searchable()
                     ->options(fn (): array => \App\Models\ErpItem::query()
                         ->whereNotNull('item_group')

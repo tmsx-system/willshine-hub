@@ -23,7 +23,7 @@ class ErpItemsTable
         return $table
             ->columns([
                 TextColumn::make('erp_item_id')
-                    ->label('ID Item ERP')
+                    ->label('ID Item')
                     ->searchable(),
                 TextColumn::make('item_code')
                     ->label('Kode Item')
