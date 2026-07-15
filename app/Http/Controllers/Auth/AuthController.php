@@ -23,7 +23,6 @@ class AuthController extends Controller
         if (Auth::guard('customer')->attempt($credentials, $request->boolean('remember'))) {
             $user = Auth::guard('customer')->user();
             
-            // Check restrictions
             if (!$user->is_active) {
                 Auth::guard('customer')->logout();
                 throw ValidationException::withMessages([

@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { Link, router, usePage } from '@inertiajs/vue3';
 import {
     Bell,
@@ -59,18 +59,28 @@ const mobileLinks = computed(() => [
 
 onMounted(() => {
     try {
-        likedProductIds.value = JSON.parse(localStorage.getItem('willshine-liked-products') || '[]');
+        likedProductIds.value = JSON.parse(localStorage.getItem('willshine-liked-products') || '[]').map(String);
     } catch {
         likedProductIds.value = [];
     }
+
+    window.addEventListener('willshine-liked-products-updated', syncLikedProducts);
 });
+
+onUnmounted(() => {
+    window.removeEventListener('willshine-liked-products-updated', syncLikedProducts);
+});
+
+function syncLikedProducts(event) {
+    likedProductIds.value = Array.isArray(event.detail) ? event.detail.map(String) : [];
+}
 
 function openPanel(panel) {
     activePanel.value = panel;
 
     if (panel === 'wishlist') {
         try {
-            likedProductIds.value = JSON.parse(localStorage.getItem('willshine-liked-products') || '[]');
+            likedProductIds.value = JSON.parse(localStorage.getItem('willshine-liked-products') || '[]').map(String);
         } catch {
             likedProductIds.value = [];
         }
@@ -141,11 +151,11 @@ function logout() {
                     <button
                         v-if="isLoggedIn"
                         type="button"
-                        class="inline-flex min-h-12 items-center gap-3 rounded-full border border-[#FBCFE8] bg-[#FDF2F8] py-2 pl-2 pr-4 text-sm font-black text-[#BE185D] shadow-sm transition duration-200 hover:-translate-y-0.5 hover:bg-[#FCE7F3] hover:shadow-[0_14px_30px_rgba(236,72,153,.16)]"
+                        class="inline-flex h-12 w-12 items-center justify-center rounded-full border border-[#FBCFE8] bg-[#FDF2F8] text-sm font-black text-[#BE185D] shadow-sm transition duration-200 hover:-translate-y-0.5 hover:bg-[#FCE7F3] hover:shadow-[0_14px_30px_rgba(236,72,153,.16)]"
+                        :aria-label="`Buka profil ${userName}`"
                         @click="openPanel('profile')"
                     >
                         <span class="flex h-8 w-8 items-center justify-center rounded-full bg-[#EC4899] text-xs font-black text-white">{{ initials }}</span>
-                        <span class="hidden max-w-32 truncate sm:inline">{{ userName }}</span>
                     </button>
                     <Link v-else href="/login" class="rounded-full bg-[#EC4899] px-6 py-3 text-sm font-black text-white shadow-[0_14px_30px_rgba(236,72,153,.28)] transition duration-200 hover:-translate-y-0.5 hover:bg-[#BE185D] hover:shadow-[0_18px_40px_rgba(190,24,93,.28)]">
                         Login

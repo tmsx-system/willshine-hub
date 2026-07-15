@@ -143,7 +143,7 @@ function logout() {
 
                     <!-- Avatar -->
                     <Link href="/buyer/settings" class="w-8 h-8 rounded-full bg-gradient-to-br from-pink-400 to-pink-600 flex items-center justify-center text-white text-xs font-bold">
-                        PB
+                        {{ initials }}
                     </Link>
                 </div>
             </div>

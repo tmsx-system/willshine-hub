@@ -73,12 +73,20 @@ const resetFilters = () => {
     selectedPromotion.value = 'All';
 };
 
-const isLiked = (productId) => likedProductIds.value.includes(productId);
+const productLikeKey = (product) => String(product.id ?? product.item_code ?? product.erp_item_id ?? product.name);
 
-const toggleLike = (productId) => {
-    likedProductIds.value = isLiked(productId)
-        ? likedProductIds.value.filter(id => id !== productId)
-        : [...likedProductIds.value, productId];
+const isLiked = (product) => likedProductIds.value.includes(productLikeKey(product));
+
+const toggleLike = (product) => {
+    const key = productLikeKey(product);
+
+    likedProductIds.value = isLiked(product)
+        ? likedProductIds.value.filter(id => id !== key)
+        : [...likedProductIds.value, key];
+
+    window.dispatchEvent(new CustomEvent('willshine-liked-products-updated', {
+        detail: likedProductIds.value,
+    }));
 };
 
 const quantityFor = (productId) => productQuantities.value[productId] || 1;
@@ -105,7 +113,7 @@ const updateProductQty = (productId, value) => {
 
 onMounted(() => {
     try {
-        likedProductIds.value = JSON.parse(localStorage.getItem('willshine-liked-products') || '[]');
+        likedProductIds.value = JSON.parse(localStorage.getItem('willshine-liked-products') || '[]').map(String);
     } catch {
         likedProductIds.value = [];
     }
@@ -241,12 +249,12 @@ const filteredProducts = computed(() => {
                         </span>
                         <button
                             type="button"
-                            class="absolute right-3 top-3 z-30 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-[#BE185D] shadow-sm transition hover:-translate-y-0.5 hover:bg-[#FCE7F3] hover:shadow-[0_12px_24px_rgba(236,72,153,.16)]"
-                            :class="isLiked(product.id) ? 'bg-[#EC4899] text-white' : ''"
-                            :aria-label="isLiked(product.id) ? 'Remove from wishlist' : 'Add to wishlist'"
-                            @click.stop.prevent="toggleLike(product.id)"
+                            class="absolute right-3 top-3 z-30 flex h-10 w-10 items-center justify-center rounded-full shadow-sm transition hover:-translate-y-0.5 hover:shadow-[0_12px_24px_rgba(236,72,153,.16)]"
+                            :class="isLiked(product) ? 'bg-[#EC4899] text-white hover:bg-[#DB2777]' : 'bg-white/90 text-[#BE185D] hover:bg-[#FCE7F3]'"
+                            :aria-label="isLiked(product) ? 'Remove from wishlist' : 'Add to wishlist'"
+                            @click.stop.prevent="toggleLike(product)"
                         >
-                            <Heart class="h-5 w-5" :fill="isLiked(product.id) ? 'currentColor' : 'none'" />
+                            <Heart class="h-5 w-5" :fill="isLiked(product) ? 'currentColor' : 'none'" />
                         </button>
                     </div>
 

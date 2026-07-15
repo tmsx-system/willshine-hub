@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { Link } from '@inertiajs/vue3';
 import {
     ArrowRight,
@@ -32,6 +32,35 @@ const products = computed(() => {
 });
 
 const categories = computed(() => props.categories);
+const likedProductIds = ref([]);
+
+const productLikeKey = (product) => String(product.id ?? product.item_code ?? product.erp_item_id ?? product.name);
+
+const isLiked = (product) => likedProductIds.value.includes(productLikeKey(product));
+
+const toggleLike = (product) => {
+    const key = productLikeKey(product);
+
+    likedProductIds.value = isLiked(product)
+        ? likedProductIds.value.filter(id => id !== key)
+        : [...likedProductIds.value, key];
+
+    window.dispatchEvent(new CustomEvent('willshine-liked-products-updated', {
+        detail: likedProductIds.value,
+    }));
+};
+
+onMounted(() => {
+    try {
+        likedProductIds.value = JSON.parse(localStorage.getItem('willshine-liked-products') || '[]').map(String);
+    } catch {
+        likedProductIds.value = [];
+    }
+});
+
+watch(likedProductIds, (ids) => {
+    localStorage.setItem('willshine-liked-products', JSON.stringify(ids));
+}, { deep: true });
 
 const heroBenefits = [
     { label: 'Benih Pilihan', icon: Leaf },
@@ -175,8 +204,14 @@ const steps = [
                         </div>
                         <div class="absolute inset-0 bg-[#EC4899]/10 mix-blend-soft-light"></div>
                         <span v-if="product.badge" class="absolute left-3 top-3 rounded-full bg-[#EC4899] px-3 py-1 text-xs font-black text-white shadow-md shadow-pink-900/15">{{ product.badge }}</span>
-                        <button class="absolute right-3 top-3 flex h-10 w-10 items-center justify-center rounded-full bg-white/92 text-[#BE185D] shadow-sm transition hover:bg-[#FCE7F3]" aria-label="Save product">
-                            <Heart class="h-5 w-5" />
+                        <button
+                            type="button"
+                            class="absolute right-3 top-3 z-30 flex h-10 w-10 items-center justify-center rounded-full shadow-sm transition hover:-translate-y-0.5 hover:shadow-[0_12px_24px_rgba(236,72,153,.16)]"
+                            :class="isLiked(product) ? 'bg-[#EC4899] text-white hover:bg-[#DB2777]' : 'bg-white/92 text-[#BE185D] hover:bg-[#FCE7F3]'"
+                            :aria-label="isLiked(product) ? 'Remove from wishlist' : 'Save product'"
+                            @click.stop.prevent="toggleLike(product)"
+                        >
+                            <Heart class="h-5 w-5" :fill="isLiked(product) ? 'currentColor' : 'none'" />
                         </button>
                     </div>
                     <div class="flex flex-1 flex-col p-3">
