@@ -322,7 +322,7 @@ function logout() {
             </div>
         </nav>
 
-        <a href="https://wa.me/" class="fixed bottom-24 right-4 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-[#16A34A] text-white shadow-xl shadow-emerald-900/20 transition hover:-translate-y-1 hover:shadow-2xl lg:bottom-6" aria-label="Contact customer service on WhatsApp">
+        <a href="https://wa.me/?text=Halo%20Willshine%20Hub%2C%20saya%20ingin%20bertanya%20tentang%20produk%20dan%20harga." class="fixed bottom-24 right-4 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-[#16A34A] text-white shadow-xl shadow-emerald-900/20 transition hover:-translate-y-1 hover:shadow-2xl lg:bottom-6" aria-label="Contact customer service on WhatsApp">
             <MessageCircle class="h-6 w-6" />
         </a>
     </div>

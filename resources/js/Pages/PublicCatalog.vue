@@ -1,7 +1,7 @@
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue';
 import { Link } from '@inertiajs/vue3';
-import { Heart, Minus, PackageSearch, Plus, Search, ShoppingCart, SlidersHorizontal } from 'lucide-vue-next';
+import { Heart, LogIn, Minus, PackageSearch, Plus, Search, ShoppingCart, SlidersHorizontal } from 'lucide-vue-next';
 import PublicLayout from '@/Layouts/PublicLayout.vue';
 import SelectMenu from '@/Components/UI/SelectMenu.vue';
 
@@ -12,7 +12,9 @@ const props = defineProps({
 const normalizedProducts = computed(() => {
     return props.products.map((product) => ({
         ...product,
-        price: product.price || 'Hubungi kami',
+        has_visible_price: Boolean(product.price),
+        price: product.price || null,
+        price_note: product.price_note || 'Login untuk harga sesuai akun customer.',
         packaging: product.packaging || product.grade || product.uom || 'Produk pertanian',
         stock_status: product.stock_status || 'Tersedia',
         badge: product.badge || null,
@@ -252,13 +254,21 @@ const filteredProducts = computed(() => {
                         <p class="text-xs font-bold uppercase tracking-[.14em] text-[#BE185D]">{{ product.category }}</p>
                         <h3 class="mt-2 text-lg font-black leading-tight text-[#111827]">{{ product.name }}</h3>
                         <p class="mt-2 text-sm text-[#6B7280]">{{ product.grade }} - {{ product.packaging }}</p>
-                        <p class="mt-4 text-lg font-black text-[#BE185D]">
-                            {{ product.price }}
-                            <span class="text-xs font-semibold text-[#9CA3AF]">/ {{ product.uom }}</span>
-                        </p>
-                        <p v-if="product.original_price" class="text-xs font-semibold text-[#9CA3AF] line-through">{{ product.original_price }}</p>
+                        <template v-if="product.has_visible_price">
+                            <p class="mt-4 text-lg font-black text-[#BE185D]">
+                                {{ product.price }}
+                                <span class="text-xs font-semibold text-[#9CA3AF]">/ {{ product.uom }}</span>
+                            </p>
+                            <p class="mt-1 text-xs font-semibold leading-5 text-[#6B7280]">{{ product.price_note }}</p>
+                            <p v-if="product.original_price" class="text-xs font-semibold text-[#9CA3AF] line-through">{{ product.original_price }}</p>
+                        </template>
+                        <div v-else class="mt-4 rounded-2xl border border-[#FBCFE8] bg-[#FFF7FB] p-3">
+                            <p class="text-sm font-black text-[#BE185D]">Harga sedang diperbarui</p>
+                            <p class="mt-1 text-xs leading-5 text-[#6B7280]">Login untuk melihat harga sesuai akun customer ketika tersedia.</p>
+                            <p class="mt-2 text-xs font-semibold text-[#9CA3AF]">UOM: {{ product.uom }}</p>
+                        </div>
 
-                        <div class="mt-5 grid grid-cols-[112px_1fr] gap-2">
+                        <div v-if="product.has_visible_price" class="mt-5 grid grid-cols-[112px_1fr] gap-2">
                             <div class="flex min-h-11 items-center justify-between rounded-xl border border-[#E5E7EB] px-3 text-sm font-bold text-[#374151]">
                                 <button type="button" aria-label="Decrease quantity" @click="setProductQty(product.id, quantityFor(product.id) - 1)"><Minus class="h-4 w-4" /></button>
                                 <input
@@ -280,10 +290,16 @@ const filteredProducts = computed(() => {
                                 :class="product.stock_status === 'Out of Stock' ? 'bg-[#F3F4F6] text-[#6B7280]' : 'bg-[#EC4899] text-white hover:bg-[#BE185D]'"
                             >
                                 <ShoppingCart v-if="product.stock_status !== 'Out of Stock'" class="h-4 w-4" />
-                                {{ product.stock_status === 'Out of Stock' ? 'Notify Me' : 'Add to Cart' }}
+                                {{ product.stock_status === 'Out of Stock' ? 'Notify Me' : 'Login Order' }}
                             </Link>
                         </div>
-                        <Link href="/login" class="mt-3 text-center text-sm font-bold text-[#BE185D] hover:underline">Quick View</Link>
+                        <div v-else class="mt-5 grid gap-2">
+                            <Link href="/login" class="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-[#FBCFE8] bg-white px-4 text-sm font-black text-[#BE185D] transition hover:bg-[#FDF2F8]">
+                                <LogIn class="h-4 w-4" />
+                                Login lihat harga
+                            </Link>
+                        </div>
+                        <Link href="/login" class="mt-3 text-center text-sm font-bold text-[#BE185D] hover:underline">Login untuk detail customer</Link>
                     </div>
                 </article>
             </div>

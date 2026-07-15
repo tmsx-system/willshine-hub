@@ -126,6 +126,7 @@ watch(() => props.product.id, () => {
             <div class="mt-auto pt-3">
                 <p class="text-base font-bold text-pink-700">{{ product.can_view_price === false ? 'Hubungi admin' : formatPrice(product.price) }}</p>
                 <p class="text-xs text-gray-400">per {{ product.uom }}</p>
+                <p v-if="product.price_note" class="mt-1 text-[11px] font-semibold text-pink-700">{{ product.price_note }}</p>
 
                 <div v-if="product.stock_status !== 'empty'" class="mt-3 flex items-center gap-2">
                     <div class="flex items-center border border-gray-200 rounded-xl overflow-hidden">

@@ -44,42 +44,7 @@ $publicImageUrl = function (?string $path): ?string {
     return Storage::disk('public')->url($path);
 };
 
-$publicProducts = function (int $limit = 48) use ($publicImageUrl) {
-    return ErpItem::query()
-        ->with('catalog.category')
-        ->where('disabled', false)
-        ->whereHas('catalog', fn ($query) => $query->where('is_visible', true))
-        ->limit($limit)
-        ->get()
-        ->map(fn (ErpItem $item) => [
-            'id' => $item->id,
-            'name' => $item->catalog->display_name ?: $item->item_name,
-            'category' => $item->catalog->category?->name ?: $item->item_group,
-            'grade' => $item->catalog->display_description ?: $item->brand,
-            'packaging' => $item->catalog->display_description ?: $item->stock_uom,
-            'uom' => $item->stock_uom,
-            'price' => $item->catalog->show_price ? 'Masuk untuk melihat harga' : 'Hubungi kami',
-            'stock_status' => 'Tersedia',
-            'image' => $publicImageUrl($item->catalog->display_image_url ?: $item->image_url),
-            'badge' => $item->catalog->is_featured ? 'Featured' : null,
-        ]);
-};
-
-$publicCategories = function () use ($publicImageUrl) {
-    return ProductCategory::query()
-        ->with(['catalogs' => fn ($query) => $query->where('is_visible', true)->orderByDesc('is_featured')])
-        ->withCount(['catalogs' => fn ($query) => $query->where('is_visible', true)])
-        ->where('is_active', true)
-        ->orderBy('display_order')
-        ->orderBy('name')
-        ->get()
-        ->map(fn (ProductCategory $category) => [
-            'id' => $category->id,
-            'name' => $category->name,
-            'count' => $category->catalogs_count . ' products',
-            'image' => $publicImageUrl($category->image_url ?: $category->catalogs->first()?->display_image_url),
-        ]);
-};
+$defaultSellingPriceList = fn (): string => ErpSetting::query()->value('default_selling_price_list') ?: 'Standard Selling';
 
 $erpItemPrice = function (string $itemCode, ?string $uom, ?string $priceList): ?float {
     if (!$priceList) {
@@ -111,6 +76,81 @@ $erpItemPrice = function (string $itemCode, ?string $uom, ?string $priceList): ?
         ->first();
 
     return $price ? (float) $price->price_list_rate : null;
+};
+
+$erpItemPriceWithFallback = function (
+    string $itemCode,
+    ?string $uom,
+    ?string $customerPriceList,
+    ?string $defaultPriceList
+) use ($erpItemPrice): array {
+    $customerPrice = $customerPriceList
+        ? $erpItemPrice($itemCode, $uom, $customerPriceList)
+        : null;
+
+    if ($customerPrice !== null) {
+        return [
+            'price' => $customerPrice,
+            'price_list' => $customerPriceList,
+            'source' => 'customer',
+        ];
+    }
+
+    $defaultPrice = $defaultPriceList
+        ? $erpItemPrice($itemCode, $uom, $defaultPriceList)
+        : null;
+
+    return [
+        'price' => $defaultPrice,
+        'price_list' => $defaultPrice !== null ? $defaultPriceList : $customerPriceList,
+        'source' => $defaultPrice !== null ? 'default' : 'missing',
+    ];
+};
+
+$publicProducts = function (int $limit = 48) use ($publicImageUrl, $erpItemPrice, $defaultSellingPriceList) {
+    $publicPriceList = $defaultSellingPriceList();
+
+    return ErpItem::query()
+        ->with('catalog.category')
+        ->where('disabled', false)
+        ->whereHas('catalog', fn ($query) => $query->where('is_visible', true))
+        ->limit($limit)
+        ->get()
+        ->map(function (ErpItem $item) use ($publicImageUrl, $erpItemPrice, $publicPriceList) {
+            $price = $erpItemPrice($item->item_code, $item->stock_uom, $publicPriceList);
+
+            return [
+                'id' => $item->id,
+                'name' => $item->catalog->display_name ?: $item->item_name,
+                'category' => $item->catalog->category?->name ?: $item->item_group,
+                'grade' => $item->catalog->display_description ?: $item->brand,
+                'packaging' => $item->catalog->display_description ?: $item->stock_uom,
+                'uom' => $item->stock_uom,
+                'price' => $price !== null ? 'Rp ' . number_format($price, 0, ',', '.') : null,
+                'can_view_price' => $price !== null,
+                'price_list' => $publicPriceList,
+                'price_note' => $price !== null ? 'Harga publik/default. Login untuk harga customer perusahaan Anda.' : "Harga default belum diisi untuk {$publicPriceList}",
+                'stock_status' => 'Tersedia',
+                'image' => $publicImageUrl($item->catalog->display_image_url ?: $item->image_url),
+                'badge' => $item->catalog->is_featured ? 'Featured' : null,
+            ];
+        });
+};
+
+$publicCategories = function () use ($publicImageUrl) {
+    return ProductCategory::query()
+        ->with(['catalogs' => fn ($query) => $query->where('is_visible', true)->orderByDesc('is_featured')])
+        ->withCount(['catalogs' => fn ($query) => $query->where('is_visible', true)])
+        ->where('is_active', true)
+        ->orderBy('display_order')
+        ->orderBy('name')
+        ->get()
+        ->map(fn (ProductCategory $category) => [
+            'id' => $category->id,
+            'name' => $category->name,
+            'count' => $category->catalogs_count . ' products',
+            'image' => $publicImageUrl($category->image_url ?: $category->catalogs->first()?->display_image_url),
+        ]);
 };
 
 Route::get('/', fn () => Inertia::render('Landing', [
@@ -184,7 +224,7 @@ Route::get('/admin/erp-settings/{record}/sync/{type}', ErpSettingSyncController:
     ->where('type', 'items|item-groups|customer-types|customers|prices')
     ->name('admin.erp-settings.sync');
 
-Route::prefix('buyer')->name('buyer.')->middleware('auth:customer')->group(function () use ($publicImageUrl, $erpItemPrice) {
+Route::prefix('buyer')->name('buyer.')->middleware('auth:customer')->group(function () use ($publicImageUrl, $erpItemPriceWithFallback, $defaultSellingPriceList) {
     Route::get('/', function (Request $request) {
         $user = $request->user('customer');
         $hasPurchaseRequestsTable = Schema::hasTable('purchase_requests');
@@ -231,13 +271,13 @@ Route::prefix('buyer')->name('buyer.')->middleware('auth:customer')->group(funct
         ]);
     })->name('dashboard');
 
-    Route::get('/catalog', function (Request $request) use ($publicImageUrl, $erpItemPrice) {
+    Route::get('/catalog', function (Request $request) use ($publicImageUrl, $erpItemPriceWithFallback, $defaultSellingPriceList) {
         $account = $request->user('customer')->loadMissing('customer.customerType', 'customerType');
         $customerId = $account->customer_id;
-        $priceList = $account->customer?->default_price_list
+        $customerPriceList = $account->customer?->default_price_list
             ?: $account->customer?->customerType?->default_price_list
-            ?: $account->customerType?->default_price_list
-            ?: ErpSetting::query()->value('default_selling_price_list');
+            ?: $account->customerType?->default_price_list;
+        $defaultPriceList = $defaultSellingPriceList();
         $canViewPrice = (bool) $account->can_view_price;
         $customerRules = collect();
         $approvedQuantities = collect();
@@ -265,7 +305,7 @@ Route::prefix('buyer')->name('buyer.')->middleware('auth:customer')->group(funct
 
         if ($customerRules->isNotEmpty()) {
             $products = $customerRules
-                ->map(function (CustomerProductCatalog $rule) use ($publicImageUrl, $erpItemPrice, $priceList, $canViewPrice, $approvedQuantities) {
+                ->map(function (CustomerProductCatalog $rule) use ($publicImageUrl, $erpItemPriceWithFallback, $customerPriceList, $defaultPriceList, $canViewPrice, $approvedQuantities) {
                     $catalog = $rule->productCatalog;
                     $item = $catalog->item;
                     $dailyQuantity = (float) $rule->daily_quantity;
@@ -276,7 +316,15 @@ Route::prefix('buyer')->name('buyer.')->middleware('auth:customer')->group(funct
                         ? min($configuredMaximum > 0 ? $configuredMaximum : $remainingQuantity, $remainingQuantity)
                         : 0;
 
-                    $price = $item && $canViewPrice ? $erpItemPrice($item->item_code, $item->stock_uom, $priceList) : null;
+                    $priceData = $item && $canViewPrice
+                        ? $erpItemPriceWithFallback($item->item_code, $item->stock_uom, $customerPriceList, $defaultPriceList)
+                        : ['price' => null, 'price_list' => $customerPriceList ?: $defaultPriceList, 'source' => 'hidden'];
+                    $priceNote = match ($priceData['source']) {
+                        'customer' => "Harga customer: {$priceData['price_list']}",
+                        'default' => "Harga default item: {$priceData['price_list']}",
+                        'hidden' => 'Harga tidak ditampilkan untuk akun ini',
+                        default => 'Harga belum tersedia',
+                    };
 
                     return [
                         'id' => $catalog->id,
@@ -285,8 +333,10 @@ Route::prefix('buyer')->name('buyer.')->middleware('auth:customer')->group(funct
                         'category' => $catalog->category?->name ?: $item?->item_group ?: 'Produk',
                         'grade' => $catalog->display_description ?: $item?->brand ?: 'Fresh',
                         'uom' => $item?->stock_uom ?: 'Unit',
-                        'price' => $price,
-                        'price_list' => $priceList,
+                        'price' => $priceData['price'],
+                        'price_list' => $priceData['price_list'],
+                        'price_note' => $priceNote,
+                        'price_source' => $priceData['source'],
                         'can_view_price' => $canViewPrice,
                         'stock' => $remainingQuantity,
                         'stock_status' => $remainingQuantity > 0 ? 'full' : 'empty',
@@ -319,8 +369,16 @@ Route::prefix('buyer')->name('buyer.')->middleware('auth:customer')->group(funct
             'categories' => $items
                 ->map(fn ($item) => $item->catalog->category?->name ?: $item->item_group)
                 ->filter()->unique()->prepend('Semua')->values(),
-            'products' => $items->map(function ($item) use ($publicImageUrl, $erpItemPrice, $priceList, $canViewPrice) {
-                $price = $canViewPrice ? $erpItemPrice($item->item_code, $item->stock_uom, $priceList) : null;
+            'products' => $items->map(function ($item) use ($publicImageUrl, $erpItemPriceWithFallback, $customerPriceList, $defaultPriceList, $canViewPrice) {
+                $priceData = $canViewPrice
+                    ? $erpItemPriceWithFallback($item->item_code, $item->stock_uom, $customerPriceList, $defaultPriceList)
+                    : ['price' => null, 'price_list' => $customerPriceList ?: $defaultPriceList, 'source' => 'hidden'];
+                $priceNote = match ($priceData['source']) {
+                    'customer' => "Harga customer: {$priceData['price_list']}",
+                    'default' => "Harga default item: {$priceData['price_list']}",
+                    'hidden' => 'Harga tidak ditampilkan untuk akun ini',
+                    default => 'Harga belum tersedia',
+                };
 
                 return [
                     'id' => $item->id,
@@ -329,8 +387,10 @@ Route::prefix('buyer')->name('buyer.')->middleware('auth:customer')->group(funct
                     'category' => $item->catalog->category?->name ?: $item->item_group ?: 'Produk',
                     'grade' => $item->catalog->display_description ?: $item->brand ?: 'Fresh',
                     'uom' => $item->stock_uom ?: 'Unit',
-                    'price' => $price,
-                    'price_list' => $priceList,
+                    'price' => $priceData['price'],
+                    'price_list' => $priceData['price_list'],
+                    'price_note' => $priceNote,
+                    'price_source' => $priceData['source'],
                     'can_view_price' => $canViewPrice,
                     'stock' => 0,
                     'stock_status' => 'empty',
